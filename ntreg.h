@@ -427,7 +427,7 @@ void nk_ls(struct hive *hdesc, char *path, int vofs, int type);
 
 struct vk_key *add_value(struct hive *hdesc, int nkofs, char *name, int type);
 void del_allvalues(struct hive *hdesc, int nkofs);
-int del_value(struct hive *hdesc, int nkofs, char *name, int = 0);
+int del_value(struct hive *hdesc, int nkofs, char *name, int quiet = 0);
 struct nk_key *add_key(struct hive *hdesc, int nkofs, char *name);
 int del_key(struct hive *hdesc, int nkofs, char *name);
 void rdel_keys(struct hive *hdesc, char *path, int nkofs);

@@ -2320,11 +2320,11 @@ void del_allvalues(struct hive *hdesc, int nkofs)
  * hdesc - yer usual hive
  * nkofs - current keyoffset
  * name  - name of value to delete
- * int   - ignored for backwards compatibility
- * returns: 0 - ok, 1 - failed
+ * quiet - silently ignore missing value
+ * returns: 0 - ok, 1 - failed, 2 - nothing to do
  */
 
-int del_value(struct hive *hdesc, int nkofs, char *name, int)
+int del_value(struct hive *hdesc, int nkofs, char *name, int quiet)
 {
   int vlistofs, slot, o, n, vkofs, newlistofs;
   int32_t *vlistkey, *tmplist, *newlistkey;
@@ -2342,8 +2342,9 @@ int del_value(struct hive *hdesc, int nkofs, char *name, int)
   }
 
   if (!nk->no_values) {
-    printf("del_value: Key has no values!\n");
-    return(1);
+    if (!quiet)
+      printf("del_value: Key has no values!\n");
+    return(2);
   }
 
   vlistofs = nk->ofs_vallist + 0x1004;
@@ -2352,8 +2353,9 @@ int del_value(struct hive *hdesc, int nkofs, char *name, int)
   slot = vlist_find(hdesc, vlistofs, nk->no_values, name, TPF_VK);
 
   if (slot == -1) {
-    printf("del_value: value %s not found!\n",name);
-    return(1);
+    if (!quiet)
+      printf("del_value: value %s not found!\n",name);
+    return(2);
   }
 
   /* Delete vk and data */
