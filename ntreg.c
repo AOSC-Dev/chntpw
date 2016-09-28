@@ -2320,11 +2320,11 @@ void del_allvalues(struct hive *hdesc, int nkofs)
  * hdesc - yer usual hive
  * nkofs - current keyoffset
  * name  - name of value to delete
- * exact - NKF_EXACT to do exact match, else first match
+ * int   - ignored for backwards compatibility
  * returns: 0 - ok, 1 - failed
  */
 
-int del_value(struct hive *hdesc, int nkofs, char *name, int exact)
+int del_value(struct hive *hdesc, int nkofs, char *name, int)
 {
   int vlistofs, slot, o, n, vkofs, newlistofs;
   int32_t *vlistkey, *tmplist, *newlistkey;
