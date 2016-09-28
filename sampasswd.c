@@ -52,7 +52,7 @@ int H_SAM = -1;
 
 
 
-int do_reset(char *user, int inrid, int verb)
+int do_reset(char *user, int inrid, int verb, int unbind)
 {
   int rid = 0;
   int ret;
@@ -87,6 +87,11 @@ int do_reset(char *user, int inrid, int verb)
   ret = sam_reset_pw(hive[H_SAM], rid);
 
   if (!ret && verb) printf("Password reset for user %s, RID = %d [0x%0x]\n",resolvedname,rid,rid);
+  
+  if (unbind) {
+    ret = sam_unbind_user_from_provider(hive[H_SAM], rid);
+    if (!ret && verb) printf("Unbound user %s from Internet credential provider, RID = %d [0x%0x]\n",resolvedname,rid,rid);
+  }
  
   FREE(resolvedname);
   return(ret);
@@ -97,7 +102,7 @@ int do_reset(char *user, int inrid, int verb)
 
 void usage(void)
 {
-  printf(" [-r|-l] [-H] -u <user> <samhive>\n"
+  printf(" [-r|-l] [-H] [-U] -u <user> <samhive>\n"
 	 "Reset password or list users in SAM database\n"
          "Mode:\n"
 	 "   -r = reset users password\n"
@@ -118,6 +123,7 @@ void usage(void)
 	 "   -H : For reset: Will output confirmation message if success\n"
 	 "   -N : No allocate mode, only allow edit of existing values with same size\n"
 	 "   -E : No expand mode, do not expand hive file (safe mode)\n"
+     "   -U : Unbind user(s) from Internet credential providers (e.g. MS accounts)\n"
 	 "   -t : Debug trace of allocated blocks\n"
 	 "   -v : Some more verbose messages/debug\n"
 	 );
@@ -135,6 +141,7 @@ int main(int argc, char **argv)
   int list = 0;
   int mode = 0;
   int human = 0;
+  int unbind = 0;
   int adm = 0;
   int all = 0;
   int first = 0;
@@ -143,13 +150,14 @@ int main(int argc, char **argv)
   char c;
   char *usr = NULL;
 
-  char *options = "rlHu:vNEthaf";
+  char *options = "rlHUu:vNEthaf";
   
   while((c=getopt(argc,argv,options)) > 0) {
     switch(c) {
     case 'r': reset = 1; break;
     case 'l': list  = 2; break;
     case 'u': usr = optarg; break;
+    case 'U': unbind = 1; break;
     case 'a': all = 1; break;
     case 'f': first = 1; break;
     case 'H': human = 1; break;
@@ -220,6 +228,7 @@ int main(int argc, char **argv)
   if (reset) {
     if (all) {
       ret = sam_reset_all_pw(hive[H_SAM], human);
+      if (unbind) ret += sam_unbind_all_from_provider(hive[H_SAM], human);
       if (ret) {
 	fprintf(stderr,"%s: ERROR: Failed reset password of ALL users\n",argv[0]); 
       }
@@ -229,10 +238,10 @@ int main(int argc, char **argv)
 	fprintf(stderr,"%s: ERROR: Unable to reset, no admin users found\n",argv[0]);
       } else {
 	//	printf("Resetting password of user with RID %x\n",adm);
-	ret = do_reset(usr, adm, human);
+	ret = do_reset(usr, adm, human, unbind);
       }
     } else {
-      ret = do_reset(usr, 0, human);
+      ret = do_reset(usr, 0, human, unbind);
       if (ret) {
 	fprintf(stderr,"%s: ERROR: Failed reset password for %s\n",argv[0],usr); 
       }

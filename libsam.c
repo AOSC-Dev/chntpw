@@ -1778,8 +1778,8 @@ int sam_reset_all_pw(struct hive *hdesc, int list)
       isadm = sam_list_user_groups(hdesc, rid, 1);
 
       if (isadm) {
-	if (list) printf("Reset user :%04x:%s\n", rid, ex.name );
-	fail |= sam_reset_pw(hdesc, rid);
+        if (list) printf("Reset user :%04x:%s\n", rid, ex.name );
+        fail |= sam_reset_pw(hdesc, rid);
       }
 
 
@@ -1826,4 +1826,64 @@ int sam_unbind_user_from_provider(struct hive *hdesc, int rid)
    
    return(0);
 
+}
+
+/* Unbind ALL admin users from Internet credential providers
+ * hdesc - hive
+ * list - if true, list some info about users processed
+ */
+
+int sam_unbind_all_from_provider(struct hive *hdesc, int list)
+{
+  char s[200];
+  struct keyval *v;
+  int nkofs;
+  int rid;
+  int isadm;
+  int count = 0;
+  int countri = 0;
+  int fail = 0;
+
+  struct ex_data ex;
+  
+  if (hdesc->type != HTYPE_SAM) return(0);
+
+  nkofs = trav_path(hdesc, 0, SAMdaunPATH, 0);
+  if (!nkofs) {
+    printf("sam_unbind_all_from_provider: Cannot find usernames in registry! (is this a SAM-hive?)\n");
+    return(1);
+  }
+
+  while ((ex_next_n(hdesc, nkofs+4, &count, &countri, &ex) > 0)) {
+
+    /* Extract the value out of the username-key, value is RID  */
+    snprintf(s,180,"%s%s\\@",SAMdaunPATH, ex.name);
+    rid = get_dword(hdesc, 0, s, TPF_VK_EXACT|TPF_VK_SHORT);
+
+    /* Now that we have the RID, build the path to, and get the V-value */
+    snprintf(s,180,"\\SAM\\Domains\\Account\\Users\\%08X\\V",rid);
+    v = get_val2buf(hdesc, NULL, 0, s, REG_BINARY, TPF_VK_EXACT);
+    if (!v) {
+      printf("sam_unbind_all_from_provider: Cannot find value <%s>\n",s);
+      return(1);
+    }
+    
+    if (v->len < 0xcc) {
+      printf("sam_unbind_all_from_provider: Value <%s> is too short (only %d bytes) to be a SAM user V-struct!\n",
+	     s, v->len);
+    } else {
+
+      isadm = sam_list_user_groups(hdesc, rid, 1);
+
+      if (isadm) {
+        if (list) printf("Unbind user :%04x:%s\n", rid, ex.name );
+        fail |= sam_unbind_user_from_provider(hdesc, rid);
+      }
+
+
+    }
+    FREE(v);
+    FREE(ex.name);
+  }
+  return(fail);
 }
