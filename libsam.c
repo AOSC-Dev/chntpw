@@ -1807,7 +1807,7 @@ int sam_unbind_user_from_provider(struct hive *hdesc, int rid)
 
    /* Now that we have the RID, find the user's key */
    snprintf(s,180,"\\SAM\\Domains\\Account\\Users\\%08X",rid);
-   key = trav_path(hdesc, 0, s, TPF_NK);
+   key = trav_path(hdesc, 0, s, TPF_NK) + 4;
    if (!key) {
      printf(" sam_unbind_user_from_provider: ERROR: User with RID 0x%x not found, path <%s>\n",rid,s);
      return(1);
