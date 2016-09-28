@@ -803,7 +803,7 @@ int sam_put_user_grpids(struct hive *hdesc, int rid, struct keyval *val)
     if (newcount == 0) {  /* Seems windows removes the key and default subvalue when user not in any group */
 
       // printf("sam_put_user_grpids: removing user reference for path %s\n",s);
-      del_value(hdesc, nk, "@", TPF_VK_EXACT);
+      del_value(hdesc, nk, "@");
       nk = trav_path(hdesc, nk, "..", 0);
       snprintf(s,180, "%08X", rid);
       del_key(hdesc, nk + 4, s);      
