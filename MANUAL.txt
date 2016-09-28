@@ -413,6 +413,7 @@ One mode must be selected
      -H : For reset: Will output confirmation message if success
      -N : No allocate mode, only allow edit of existing values with same size
      -E : No expand mode, do not expand hive file (safe mode)
+     -U : Unbind user(s) from Internet credential providers (e.g. MS accounts)
      -t : Debug trace of allocated blocks
      -v : Some more verbose messages/debug
 
@@ -447,6 +448,11 @@ which of course is :RID:username
 Explanation on this:
      -r -f -> Reset password of admin user with lowest RID
               not counting built-in admin (0x1f4) unless it is the only admin
+              
+     -r -U -> For any user whose password is being reset, also unbind the user
+              from any Internet-based credential providers it may be bound to.
+              This is useful for regaining access to Microsoft accounts on
+              Windows 8 and up (the account will be converted to local user).
 
 All windows from NT3.1 up has a system created administrator account
 with RID (user ID) 0x1f4 (500 decimal)
