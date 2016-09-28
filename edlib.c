@@ -539,7 +539,7 @@ void regedit_interactive(struct hive *hive[], int no_hives)
       case MCMD_DELV :
 	bp++;
 	skipspace(&bp);
-        del_value(hdesc, cdofs + 4, bp);
+        del_value(hdesc, cdofs + 4, bp, 0);
 	break;
       case MCMD_ADDV :
 	bp++;

@@ -448,7 +448,7 @@ void promote_user(int rid)
 #if 1
   printf("\nDeleting user memberships\n");
   
-  del_value(hive[H_SAM], nk, "@");
+  del_value(hive[H_SAM], nk, "@", 0);
   
   printf("Adding into only administrators:\n");
   
@@ -1134,7 +1134,7 @@ void mainloop(void)
       case MCMD_DELV :
 	bp++;
 	skipspace(&bp);
-        del_value(hdesc, cdofs + 4, bp);
+        del_value(hdesc, cdofs + 4, bp, 0);
 	break;
       case MCMD_ADDV :
 	bp++;
