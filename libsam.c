@@ -1789,3 +1789,41 @@ int sam_reset_all_pw(struct hive *hdesc, int list)
   }
   return(fail);
 }
+
+
+/* Unbinds user from Internet credential provider
+ * hdesc - the HIVE :)
+ * rid - the users RID
+ *
+ * Returns: 0 = OK, 1 = error (for use in exit())
+ */
+int sam_unbind_user_from_provider(struct hive *hdesc, int rid)
+{
+   
+   char s[200];
+   int key;
+  
+   if (!hdesc || !rid) return(1);
+
+   /* Now that we have the RID, find the user's key */
+   snprintf(s,180,"\\SAM\\Domains\\Account\\Users\\%08X",rid);
+   key = trav_path(hdesc, 0, s, TPF_NK);
+   if (!key) {
+     printf(" sam_unbind_user_from_provider: ERROR: User with RID 0x%x not found, path <%s>\n",rid,s);
+     return(1);
+   }
+   
+   /* And now, delete all Internet provider related values found */
+   del_value(hdesc, key, "CachedLogonInfo");
+   del_value(hdesc, key, "GivenName");
+   del_value(hdesc, key, "InternetProviderAttributes");
+   del_value(hdesc, key, "InternetProviderGUID");
+   del_value(hdesc, key, "InternetProviderName");
+   del_value(hdesc, key, "InternetSID");
+   del_value(hdesc, key, "InternetUID");
+   del_value(hdesc, key, "InternetUserName");
+   del_value(hdesc, key, "Surname");
+   
+   return(0);
+
+}

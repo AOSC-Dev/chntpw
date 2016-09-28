@@ -316,6 +316,40 @@ void interactive_addusrgrp(int rid)
 }
 
 
+/* Unbind user from Internet credential provider (e.g. Microsoft Accounts)
+ * rid   - users rid
+ * no returns yet
+ */
+
+void unbind_internetprovider(int rid)
+{
+
+  char yn[5];
+
+  if (!rid || (H_SAM < 0)) return;
+  
+  printf("\n=== UNBIND USER FROM INTERNET CREDENTIAL PROVIDER\n\n");
+  printf("Will unbind the user from any Internet credential providers\n"
+	 "it may be bound to, such as Microsoft Accounts.\n"
+	 "The user's login credentials will then be stored locally in the SAM.\n\n"
+	 "It's recommended to clear the password after doing this.\n\n");
+
+  fmyinput("Do it? (y/n) [n] : ", yn, 3);
+
+  if (*yn == 'y') {
+
+    printf("* Unbinding from Internet credential provider ...\n");
+    sam_unbind_user_from_provider(hive[H_SAM], rid);
+
+    printf("\nUnbind DONE!\n");
+
+  } else {
+    printf("Nothing done, going back..\n");
+  }
+
+}
+
+
 /* Decode the V-struct, and change the password
  * vofs - offset into SAM buffer, start of V struct
  * rid - the users RID, required for the DES decrypt stage
@@ -492,6 +526,7 @@ char *change_pw(char *buf, int rid, int vlen, int stat)
    printf(" 3 - Promote user (make user an administrator)\n");
    printf(" 4 - Add user to a group\n");
    printf(" 5 - Remove user from a group\n");
+   printf(" 6 - Unbind user from Internet credential provider (e.g. Microsoft Accounts)\n");
 #ifdef DOCRYPTO
    printf(" 9 - Edit (set new) user password (careful with this on XP or Vista)\n");
 #endif
@@ -519,6 +554,11 @@ char *change_pw(char *buf, int rid, int vlen, int stat)
 
    if (*newp == '5') {
      interactive_remusrgrp(rid);
+     // return(username);
+   }
+   
+   if (*newp == '6') {
+     unbind_internetprovider(rid);
      // return(username);
    }
 

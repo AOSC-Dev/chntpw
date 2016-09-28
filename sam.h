@@ -290,6 +290,7 @@ int sam_list_user_groups(struct hive *hdesc, int rid, int check);
 int sam_reset_pw(struct hive *hdesc, int rid);
 void sam_list_groups(struct hive *hdesc, int listmembers, int human);
 int sam_reset_all_pw(struct hive *hdesc, int list);
+int sam_unbind_user_from_provider(struct hive *hdesc, int rid);
 
 
 
