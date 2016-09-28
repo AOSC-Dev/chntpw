@@ -252,7 +252,7 @@ int i;
 
 /* HexDump all or a part of some buffer */
 
-void hexdump(char *hbuf, int start, int stop, int ascii)
+void hexdump(void *hbuf, int start, int stop, int ascii)
 {
    char c;
    int diff,i;
@@ -265,12 +265,12 @@ void hexdump(char *hbuf, int start, int stop, int ascii)
       printf(":%05X  ",start);
 
       for (i = 0; i < diff; i++) {
-	 printf("%02X ",(unsigned char)*(hbuf+start+i));
+	 printf("%02X ",*(unsigned char *)(hbuf+start+i));
       }
       if (ascii) {
 	for (i = diff; i < 16; i++) printf("   ");
 	for (i = 0; i < diff; i++) {
-	  c = *(hbuf+start+i);
+	  c = *(char *)(hbuf+start+i);
 	  printf("%c", isprint(c) ? c : '.');
 	}
       }
@@ -539,27 +539,27 @@ void parse_nk(struct hive *hdesc, int vofs, int blen)
 #define D_OFFS(o) ( (void *)&(key->o)-(void *)hdesc->buffer-vofs )
 
   key = (struct nk_key *)(hdesc->buffer + vofs);
-  printf("%04x   type              = 0x%02x %s\n", D_OFFS(type)  ,key->type,
+  printf("%04lx   type              = 0x%02x %s\n", D_OFFS(type)  ,key->type,
 	                           (key->type == KEY_ROOT ? "ROOT_KEY" : "") );
-  printf("%04x   timestamp skipped\n", D_OFFS(timestamp) );
-  printf("%04x   parent key offset = 0x%0x\n", D_OFFS(ofs_parent) ,key->ofs_parent + 0x1000);
-  printf("%04x   number of subkeys = %d\n", D_OFFS(no_subkeys),key->no_subkeys);
-  printf("%04x   lf-record offset  = 0x%0x\n",D_OFFS(ofs_lf),key->ofs_lf + 0x1000);
-  printf("%04x   number of values  = %d\n", D_OFFS(no_values),key->no_values);
-  printf("%04x   val-list offset   = 0x%0x\n",D_OFFS(ofs_vallist),key->ofs_vallist + 0x1000);
-  printf("%04x   sk-record offset  = 0x%0x\n",D_OFFS(ofs_sk),key->ofs_sk + 0x1000);
-  printf("%04x   classname offset  = 0x%0x\n",D_OFFS(ofs_classnam),key->ofs_classnam + 0x1000);
+  printf("%04lx   timestamp skipped\n", D_OFFS(timestamp) );
+  printf("%04lx   parent key offset = 0x%0x\n", D_OFFS(ofs_parent) ,key->ofs_parent + 0x1000);
+  printf("%04lx   number of subkeys = %d\n", D_OFFS(no_subkeys),key->no_subkeys);
+  printf("%04lx   lf-record offset  = 0x%0x\n",D_OFFS(ofs_lf),key->ofs_lf + 0x1000);
+  printf("%04lx   number of values  = %d\n", D_OFFS(no_values),key->no_values);
+  printf("%04lx   val-list offset   = 0x%0x\n",D_OFFS(ofs_vallist),key->ofs_vallist + 0x1000);
+  printf("%04lx   sk-record offset  = 0x%0x\n",D_OFFS(ofs_sk),key->ofs_sk + 0x1000);
+  printf("%04lx   classname offset  = 0x%0x\n",D_OFFS(ofs_classnam),key->ofs_classnam + 0x1000);
 
-  printf("%04x   dummy3            = 0x%0x (%d)\n",D_OFFS(dummy3),key->dummy3,key->dummy3);
-  printf("%04x   dummy4            = 0x%0x (%d)\n",D_OFFS(dummy4),key->dummy4,key->dummy4);
-  printf("%04x   dummy5            = 0x%0x (%d)\n",D_OFFS(dummy5),key->dummy5,key->dummy5);
-  printf("%04x   dummy6            = 0x%0x (%d)\n",D_OFFS(dummy6),key->dummy6,key->dummy6);
-  printf("%04x   dummy7            = 0x%0x (%d)\n",D_OFFS(dummy7),key->dummy7,key->dummy7);
+  printf("%04lx   dummy3            = 0x%0x (%d)\n",D_OFFS(dummy3),key->dummy3,key->dummy3);
+  printf("%04lx   dummy4            = 0x%0x (%d)\n",D_OFFS(dummy4),key->dummy4,key->dummy4);
+  printf("%04lx   dummy5            = 0x%0x (%d)\n",D_OFFS(dummy5),key->dummy5,key->dummy5);
+  printf("%04lx   dummy6            = 0x%0x (%d)\n",D_OFFS(dummy6),key->dummy6,key->dummy6);
+  printf("%04lx   dummy7            = 0x%0x (%d)\n",D_OFFS(dummy7),key->dummy7,key->dummy7);
 
-  printf("%04x   name length       = %d\n", D_OFFS(len_name),key->len_name);
-  printf("%04x   classname length  = %d\n", D_OFFS(len_classnam),key->len_classnam);
+  printf("%04lx   name length       = %d\n", D_OFFS(len_name),key->len_name);
+  printf("%04lx   classname length  = %d\n", D_OFFS(len_classnam),key->len_classnam);
 
-  printf("%04x   Key name: <",D_OFFS(keyname) );
+  printf("%04lx   Key name: <",D_OFFS(keyname) );
   for(i = 0; i < key->len_name; i++) putchar(key->keyname[i]);
   printf(">\n== End of key info.\n");
 
@@ -577,18 +577,18 @@ void parse_vk(struct hive *hdesc, int vofs, int blen)
 
 
   key = (struct vk_key *)(hdesc->buffer + vofs);
-  printf("%04x   name length       = %d (0x%0x)\n", D_OFFS(len_name),
+  printf("%04lx   name length       = %d (0x%0x)\n", D_OFFS(len_name),
 	                             key->len_name, key->len_name  );
-  printf("%04x   length of data    = %d (0x%0x)\n", D_OFFS(len_data),
+  printf("%04lx   length of data    = %d (0x%0x)\n", D_OFFS(len_data),
 	                             key->len_data, key->len_data  );
-  printf("%04x   data offset       = 0x%0x\n",D_OFFS(ofs_data),key->ofs_data + 0x1000);
-  printf("%04x   value type        = 0x%0x  %s\n", D_OFFS(val_type), key->val_type,
+  printf("%04lx   data offset       = 0x%0x\n",D_OFFS(ofs_data),key->ofs_data + 0x1000);
+  printf("%04lx   value type        = 0x%0x  %s\n", D_OFFS(val_type), key->val_type,
                  (key->val_type <= REG_MAX ? val_types[key->val_type] : "(unknown)") ) ;
 
-  printf("%04x   flag              = 0x%0x\n",D_OFFS(flag),key->flag);
-  printf("%04x   *unused?*         = 0x%0x\n",D_OFFS(dummy1),key->dummy1);
+  printf("%04lx   flag              = 0x%0x\n",D_OFFS(flag),key->flag);
+  printf("%04lx   *unused?*         = 0x%0x\n",D_OFFS(dummy1),key->dummy1);
 
-  printf("%04x   Key name: <",D_OFFS(keyname) );
+  printf("%04lx   Key name: <",D_OFFS(keyname) );
   for(i = 0; i < key->len_name; i++) putchar(key->keyname[i]);
   printf(">\n== End of key info.\n");
 
@@ -606,12 +606,12 @@ void parse_sk(struct hive *hdesc, int vofs, int blen)
   printf("== sk at offset %0x\n",vofs);
 
   key = (struct sk_key *)(hdesc->buffer + vofs);
-  printf("%04x   *unused?*         = %d\n"   , D_OFFS(dummy1),     key->dummy1    );
-  printf("%04x   Offset to prev sk = 0x%0x\n", D_OFFS(ofs_prevsk), key->ofs_prevsk + 0x1000);
-  printf("%04x   Offset to next sk = 0x%0x\n", D_OFFS(ofs_nextsk), key->ofs_nextsk + 0x1000);
-  printf("%04x   Usage counter     = %d (0x%0x)\n", D_OFFS(no_usage),
+  printf("%04lx   *unused?*         = %d\n"   , D_OFFS(dummy1),     key->dummy1    );
+  printf("%04lx   Offset to prev sk = 0x%0x\n", D_OFFS(ofs_prevsk), key->ofs_prevsk + 0x1000);
+  printf("%04lx   Offset to next sk = 0x%0x\n", D_OFFS(ofs_nextsk), key->ofs_nextsk + 0x1000);
+  printf("%04lx   Usage counter     = %d (0x%0x)\n", D_OFFS(no_usage),
 	                                            key->no_usage,key->no_usage);
-  printf("%04x   Security data len = %d (0x%0x)\n", D_OFFS(len_sk),
+  printf("%04lx   Security data len = %d (0x%0x)\n", D_OFFS(len_sk),
 	                                            key->len_sk,key->len_sk);
 
   printf("== End of key info.\n");
@@ -630,10 +630,10 @@ void parse_lf(struct hive *hdesc, int vofs, int blen)
   printf("== lf at offset %0x\n",vofs);
 
   key = (struct lf_key *)(hdesc->buffer + vofs);
-  printf("%04x   number of keys    = %d\n", D_OFFS(no_keys), key->no_keys  );
+  printf("%04lx   number of keys    = %d\n", D_OFFS(no_keys), key->no_keys  );
 
   for(i = 0; i < key->no_keys; i++) {
-    printf("%04x      %3d   Offset: 0x%0x  - <%c%c%c%c>\n", 
+    printf("%04lx      %3d   Offset: 0x%0x  - <%c%c%c%c>\n", 
 	   D_OFFS(hash[i].ofs_nk), i,
 	   key->hash[i].ofs_nk + 0x1000,
            key->hash[i].name[0],
@@ -658,10 +658,10 @@ void parse_lh(struct hive *hdesc, int vofs, int blen)
   printf("== lh at offset %0x\n",vofs);
 
   key = (struct lf_key *)(hdesc->buffer + vofs);
-  printf("%04x   number of keys    = %d\n", D_OFFS(no_keys), key->no_keys  );
+  printf("%04lx   number of keys    = %d\n", D_OFFS(no_keys), key->no_keys  );
 
   for(i = 0; i < key->no_keys; i++) {
-    printf("%04x      %3d   Offset: 0x%0x  - <hash: %08x>\n", 
+    printf("%04lx      %3d   Offset: 0x%0x  - <hash: %08x>\n", 
 	   D_OFFS(lh_hash[i].ofs_nk), i,
 	   key->lh_hash[i].ofs_nk + 0x1000,
            key->lh_hash[i].hash );
@@ -685,10 +685,10 @@ void parse_li(struct hive *hdesc, int vofs, int blen)
   /* #define D_OFFS(o) ( (void *)&(key->o)-(void *)hdesc->buffer-vofs ) */
 
   key = (struct li_key *)(hdesc->buffer + vofs);
-  printf("%04x   number of keys    = %d\n", D_OFFS(no_keys), key->no_keys  );
+  printf("%04lx   number of keys    = %d\n", D_OFFS(no_keys), key->no_keys  );
 
   for(i = 0; i < key->no_keys; i++) {
-    printf("%04x      %3d   Offset: 0x%0x\n", 
+    printf("%04lx      %3d   Offset: 0x%0x\n", 
 	   D_OFFS(hash[i].ofs_nk), i,
 	   key->hash[i].ofs_nk + 0x1000);
   }
@@ -710,10 +710,10 @@ void parse_ri(struct hive *hdesc, int vofs, int blen)
   /* #define D_OFFS(o) ( (void *)&(key->o)-(void *)hdesc->buffer-vofs ) */
 
   key = (struct ri_key *)(hdesc->buffer + vofs);
-  printf("%04x   number of subindices = %d\n", D_OFFS(no_lis), key->no_lis  );
+  printf("%04lx   number of subindices = %d\n", D_OFFS(no_lis), key->no_lis  );
 
   for(i = 0; i < key->no_lis; i++) {
-    printf("%04x      %3d   Offset: 0x%0x\n", 
+    printf("%04lx      %3d   Offset: 0x%0x\n", 
 	   D_OFFS(hash[i].ofs_li), i,
 	   key->hash[i].ofs_li + 0x1000);
   }
@@ -732,9 +732,9 @@ void parse_db(struct hive *hdesc, int vofs, int blen)
   printf("== db at offset %0x\n",vofs);
 
   key = (struct db_key *)(hdesc->buffer + vofs);
-  printf("%04x   number of parts    = %d\n", D_OFFS(no_part), key->no_part  );
+  printf("%04lx   number of parts    = %d\n", D_OFFS(no_part), key->no_part  );
 
-  printf("%04x   Data list at offset: 0x%0x\n", 
+  printf("%04lx   Data list at offset: 0x%0x\n", 
 	   D_OFFS(ofs_data),
 	   key->ofs_data + 0x1000);
   
@@ -2147,7 +2147,7 @@ int alloc_val_data(struct hive *hdesc, int vofs, char *path, int size,int exact)
 
 
   } else { /* 4 bytes or less are inlined */
-    datablk = vkofs + (int32_t)&(vkkey->ofs_data) - (int32_t)vkkey;
+    datablk = vkofs + (int32_t)((void *)&(vkkey->ofs_data) - (void *)vkkey);
     size |= 0x80000000;
   }
 

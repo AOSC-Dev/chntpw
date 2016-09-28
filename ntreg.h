@@ -391,7 +391,7 @@ char *str_cat(char *str, char *add);
 char *str_catf(char *str, const char *format, ... );
 int fmyinput(char *prmpt, char *ibuf, int maxlen);
 void hexprnt(char *s, unsigned char *bytes, int len);
-void hexdump(char *hbuf, int start, int stop, int ascii);
+void hexdump(void *hbuf, int start, int stop, int ascii);
 int find_in_buf(char *buf, char *what, int sz, int len, int start);
 int get_int( char *array );
 void cheap_uni2ascii(char *src, char *dest, int l);

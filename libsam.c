@@ -528,7 +528,7 @@ int sam_put_grp_members_sid(struct hive *hdesc, int grp, struct sid_array *sarra
     sidptr = &cd->data[mofs];
 
     for (i = 0; sarray[i].sidptr; i++) {
-      if (gverbose) printf("  copying : %d len %x, at %x\n",i,sarray[i].len, sidptr);
+      if (gverbose) printf("  copying : %d len %x, at %p\n",i,sarray[i].len, sidptr);
       str = sam_sid_to_string(sarray[i].sidptr);
       if (gverbose) printf("  Member # %d = <%s>\n", i, str);
       FREE(str);      
