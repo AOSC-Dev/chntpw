@@ -1814,15 +1814,15 @@ int sam_unbind_user_from_provider(struct hive *hdesc, int rid)
    }
    
    /* And now, delete all Internet provider related values found */
-   del_value(hdesc, key, "CachedLogonInfo");
-   del_value(hdesc, key, "GivenName");
-   del_value(hdesc, key, "InternetProviderAttributes");
-   del_value(hdesc, key, "InternetProviderGUID");
-   del_value(hdesc, key, "InternetProviderName");
-   del_value(hdesc, key, "InternetSID");
-   del_value(hdesc, key, "InternetUID");
-   del_value(hdesc, key, "InternetUserName");
-   del_value(hdesc, key, "Surname");
+   del_value(hdesc, key, "CachedLogonInfo", 1);
+   del_value(hdesc, key, "GivenName", 1);
+   del_value(hdesc, key, "InternetProviderAttributes", 1);
+   del_value(hdesc, key, "InternetProviderGUID", 1);
+   del_value(hdesc, key, "InternetProviderName", 1);
+   del_value(hdesc, key, "InternetSID", 1);
+   del_value(hdesc, key, "InternetUID", 1);
+   del_value(hdesc, key, "InternetUserName", 1);
+   del_value(hdesc, key, "Surname", 1);
    
    return(0);
 
