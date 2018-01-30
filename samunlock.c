@@ -1,17 +1,15 @@
 /*
- * sampasswd.c - SAM database, reset user password or account bits
- * 
- * Command line utility, non-interactive to reset user password and/or
- * account bits for a user in the SAM database
+ * samunlock.c - SAM database, Unlock user
+ *
+ * Command line utility, non-interactive to unlock a user
+ * in the SAM database
  *
  * Changes:
- * 2013 - aug: cleaned up a bit for release, some debug still there
- * 2013 - apr-may: reset one, all and first features
- * 2012 - oct: First version, some code from earlier chntpw.c. Not released.
+ * 2014 - oct: First version, some code from earlier sampasswd.c.
  *
  *****
  *
- * Copyright (c) 1997-2014 Petter Nordahl-Hagen.
+ * Copyright (c) 2014 Adrian Gibanel
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +21,7 @@
  * GNU General Public License for more details.
  *
  * See file GPL.txt for the full license.
- * 
+ *
  *****
  */
 
@@ -37,7 +35,7 @@
 #include "sam.h"
 
 
-const char sampasswd_version[] = "sampasswd version 0.2 140201, (c) Petter N Hagen";
+const char samunlock_version[] = "samunlock version 0.1 141018, (c) Adrian Gibanel";
 
 
 /* Global verbosity flag */
@@ -52,12 +50,13 @@ int H_SAM = -1;
 
 
 
-int do_reset(char *user, int inrid, int verb, int unbind)
+int do_unlock(char *user, int inrid, int verb)
 {
   int rid = 0;
   int ret;
   char *resolvedname = NULL;
   char s[200];
+  unsigned short acb;
 
   if ((H_SAM < 0) || (!user && !inrid) ) return(1);
 
@@ -82,17 +81,14 @@ int do_reset(char *user, int inrid, int verb, int unbind)
 
   if (!resolvedname) return(1);  /* RID lookup failed, no such user */
 
-  if (gverbose) printf("do_reset: Username: %s, RID = %d (0x%0x)\n",resolvedname,rid,rid);
-  
-  ret = sam_reset_pw(hive[H_SAM], rid);
+  if (gverbose) printf("do_unlock: Username: %s, RID = %d (0x%0x)\n",resolvedname,rid,rid);
 
-  if (!ret && verb) printf("Password reset for user %s, RID = %d [0x%0x]\n",resolvedname,rid,rid);
-  
-  if (unbind) {
-    ret = sam_unbind_user_from_provider(hive[H_SAM], rid);
-    if (!ret && verb) printf("Unbound user %s from Internet credential provider, RID = %d [0x%0x]\n",resolvedname,rid,rid);
-  }
- 
+  acb = sam_handle_accountbits(hive[H_SAM], rid,2);
+
+  ret = acb & 0x8000; /* ret != 0 means locked ; ret == 0 means unlocked */
+
+  if (!ret && verb) printf("Unlock user %s, RID = %d [0x%0x]\n",resolvedname,rid,rid);
+
   FREE(resolvedname);
   return(ret);
 
@@ -102,28 +98,26 @@ int do_reset(char *user, int inrid, int verb, int unbind)
 
 void usage(void)
 {
-  printf(" [-r|-l] [-H] [-U] -u <user> <samhive>\n"
-	 "Reset password or list users in SAM database\n"
+  printf(" [-U|-l] [-H] -u <user> <samhive>\n"
+	 "Unlock user or list users in SAM database\n"
          "Mode:\n"
-	 "   -r = reset users password\n"
+	 "   -U = Unlock user\n"
          "   -l = list users in sam\n"
          "Parameters:\n"
          "   <user> can be given as a username or a RID in hex with 0x in front\n"
          "   Example:\n"
-         "   -r -u theboss -> resets password of user named 'theboss' if found\n"
-         "   -r -u 0x3ea -> resets password for user with RID 0x3ea (hex)\n"
-	 "   -r -a -> Reset password of all users in administrators group (0x220)\n"
-	 "   -r -f -> Reset password of admin user with lowest RID\n"
+         "   -U -u theboss -> Unlocks user named 'theboss' if found\n"
+         "   -U -u 0x3ea -> Unlocks user with RID 0x3ea (hex)\n"
+	 "   -U -f -> Unlocks admin user with lowest RID\n"
 	 "            not counting built-in admin (0x1f4) unless it is the only admin\n"
          "   Usernames with international characters usually fails to be found,\n"
          "   please use RID number instead\n"
 	 "   If success, there will be no output, and exit code is 0\n"
 	 "Options:\n"
 	 "   -H : For list: Human readable listing (default is parsable table)\n"
-	 "   -H : For reset: Will output confirmation message if success\n"
+	 "   -H : For unlock: Will output confirmation message if success\n"
 	 "   -N : No allocate mode, only allow edit of existing values with same size\n"
 	 "   -E : No expand mode, do not expand hive file (safe mode)\n"
-     "   -U : Unbind user(s) from Internet credential providers (e.g. MS accounts)\n"
 	 "   -t : Debug trace of allocated blocks\n"
 	 "   -v : Some more verbose messages/debug\n"
 	 );
@@ -132,58 +126,54 @@ void usage(void)
 
 int main(int argc, char **argv)
 {
-   
+
   extern int optind;
   extern char* optarg;
 
   int what = 0;
-  int reset = 0;
+  int unlock = 0;
   int list = 0;
   int mode = 0;
   int human = 0;
-  int unbind = 0;
   int adm = 0;
-  int all = 0;
   int first = 0;
   int ret, wret, il;
   char *hivename;
   char c;
   char *usr = NULL;
 
-  char *options = "rlHUu:vNEthaf";
-  
+  char *options = "UlHu:vNEthaf";
+
   while((c=getopt(argc,argv,options)) > 0) {
     switch(c) {
-    case 'r': reset = 1; break;
+    case 'U': unlock = 1; break;
     case 'l': list  = 2; break;
     case 'u': usr = optarg; break;
-    case 'U': unbind = 1; break;
-    case 'a': all = 1; break;
     case 'f': first = 1; break;
     case 'H': human = 1; break;
     case 'v': mode |= HMODE_VERBOSE; gverbose = 1; break;
     case 'N': mode |= HMODE_NOALLOC; break;
     case 'E': mode |= HMODE_NOEXPAND; break;
     case 't': mode |= HMODE_TRACE; break;
-    case 'h': printf("%s\n%s ",sampasswd_version,argv[0]); usage(); exit(0); break;
-    default: printf("%s\n%s ",sampasswd_version,argv[0]); usage(); exit(1); break;
+    case 'h': printf("%s\n%s ",samunlock_version,argv[0]); usage(); exit(0); break;
+    default: printf("%s\n%s ",samunlock_version,argv[0]); usage(); exit(1); break;
     }
   }
 
-  if (!reset && !list && !what) {
-    fprintf(stderr,"%s: ERROR: Mode -r or -l must be specified. -h for help\n",argv[0]);
+  if (!unlock && !list && !what) {
+    fprintf(stderr,"%s: ERROR: Mode -U or -l must be specified. -h for help\n",argv[0]);
     exit(1);
   }
 
 #if 0   /* Should both be allowed at same time?? */
-  if (list && reset) {
-    fprintf(stderr,"%s: ERROR: Mode -r and -l impossible at the same time. -h for help\n",argv[0]);
+  if (list && unlock) {
+    fprintf(stderr,"%s: ERROR: Mode -U and -l impossible at the same time. -h for help\n",argv[0]);
     exit(1);
   }
 #endif
 
-  if (reset && !all && !first && (!usr || !*usr)) {
-    fprintf(stderr,"%s: ERROR: Need a user for reset, -u must be specified.\n",argv[0]);
+  if (unlock && !first && (!usr || !*usr)) {
+    fprintf(stderr,"%s: ERROR: Need a user for unlock, -u must be specified.\n",argv[0]);
     exit(1);
   }
 
@@ -225,25 +215,19 @@ int main(int argc, char **argv)
     if (gverbose) printf("   sam_list_users found admin to be 0x%x\n",adm);
   }
 
-  if (reset) {
-    if (all) {
-      ret = sam_reset_all_pw(hive[H_SAM], human);
-      if (unbind) ret += sam_unbind_all_from_provider(hive[H_SAM], human);
-      if (ret) {
-	fprintf(stderr,"%s: ERROR: Failed reset password of ALL users\n",argv[0]); 
-      }
-    } else if (first) {
+  if (unlock) {
+    if (first) {
       adm = sam_list_users(hive[H_SAM], 2);
       if (!adm) {
-	fprintf(stderr,"%s: ERROR: Unable to reset, no admin users found\n",argv[0]);
+	fprintf(stderr,"%s: ERROR: Unable to unlock, no admin users found\n",argv[0]);
       } else {
 	//	printf("Resetting password of user with RID %x\n",adm);
-	ret = do_reset(usr, adm, human, unbind);
+	ret = do_unlock(usr, adm, human);
       }
     } else {
-      ret = do_reset(usr, 0, human, unbind);
+      ret = do_unlock(usr, 0, human);
       if (ret) {
-	fprintf(stderr,"%s: ERROR: Failed reset password for %s\n",argv[0],usr); 
+	fprintf(stderr,"%s: ERROR: Failed to unlock %s\n",argv[0],usr);
       }
     }
   }
@@ -254,7 +238,7 @@ int main(int argc, char **argv)
   for (il = 0; il < no_hives; il++) {
     wret |= writeHive(hive[il]);
     if (hive[il]->state & HMODE_DIDEXPAND)
-      fprintf(stderr," WARNING: Registry file %s was expanded! Experimental! Use at own risk!\n",hive[il]->filename);  
+      fprintf(stderr," WARNING: Registry file %s was expanded! Experimental! Use at own risk!\n",hive[il]->filename);
     while (no_hives > 0)
       closeHive(hive[--no_hives]);
   }
