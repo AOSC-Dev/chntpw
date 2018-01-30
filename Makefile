@@ -6,18 +6,17 @@
 # See INSTALL for more info.
 #
 
-#SSLPATH=/usr/local/ssl
 OSSLPATH=/usr
 OSSLINC=$(OSSLPATH)/include
 
 CC=gcc
 
 # Force 32 bit
-CFLAGS= -DUSEOPENSSL -g -I. -I$(OSSLINC) -Wall -m32 
+#CFLAGS= -DUSEOPENSSL -g -I. -I$(OSSLINC) -Wall -m32
 OSSLLIB=$(OSSLPATH)/lib
 
 # 64 bit if default for compiler setup
-#CFLAGS= -DUSEOPENSSL -g -I. -I$(OSSLINC) -Wall
+CFLAGS= -DUSEOPENSSL -g -I. -I$(OSSLINC) -Wall
 #OSSLLIB=$(OSSLPATH)/lib64
 
 
