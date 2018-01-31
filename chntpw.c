@@ -360,24 +360,26 @@ change_acb_init:
   while (1) {
     printf("- - - - Toggling account bits:\n");
     printf("Hex from 0 to e - toggle this bit");
-    printf("d - Re-explain accountbits");
-    printf("q - Quit editing accountbits");
+    printf("d - Re-explain account bits");
+    printf("q - Quit editing account bits");
 
     pl = fmyinput("Select: [q] > ", input, 16);
 
-    *input = tolower(*input);
+    if ('A' <= *input && *input <= 'Z') {
+      *input -= ('A' - 'a');
+    }
 
     if ((pl < 1) || (*input == 'q')) return acb;
 
     if (*input == 'd') goto change_acb_init;
 
-    if (!isalnum(*input) || *input > 'e') {
-      puts("Pardon me?");
-      continue;
-    } else if (*input <= '9' && *input > '0') {
+    if (*input <= '9' && *input >= '0') {
       bit = *input - '0';
-    } else {
+    } else if ('a' <= *input && *input <= 'e') {
       bit = 0xa + *input - 'a';
+    } else {
+      puts ("Pardon me?");
+      continue;
     }
 
     acb ^= 1u << bit;
