@@ -1,0 +1,46 @@
+#!/bin/sh
+#
+# stage2 (c) 1997-2008 Petter N Hagen
+# part of ntchangepasswd bootdisk scripts
+#
+# General setup continued
+# After init has detached from the console devices
+#
+
+echo "In stage 2"
+
+#exec </dev/console >/dev/console 2>/dev/console
+
+#/bin/udevstart
+
+
+
+mdev -s
+
+echo "Spawning shells on console 2 - 4"
+
+for i in 1 2 3 4 
+do
+    case $i in
+       1) ;;
+       *) openvt
+    esac
+done
+
+mkdir /tmp /disk
+chmod 777 /tmp
+
+echo "Initialization complete!"
+
+sh /scripts/prepdriver.sh
+
+mdev -s
+
+cat /scripts/banner1
+
+sh /scripts/main.sh
+
+sh
+
+echo "if you really want to exit, type reboot or press ctrl-alt-del"
+

@@ -1,0 +1,38 @@
+#!/bin/sh
+# initrd Boot RC file
+# chntpw boot floppy support script
+# (c) 2004-2005 Petter N Hagen
+# Some of this is ripped from "floppyfw" by Thomasez@zelow.no
+
+/bin/busybox echo "### Booting ntpasswd" 
+
+PATH="/bin:/sbin:/usr/bin:/usr/sbin"
+TERM=linux
+export PATH TERM
+umask 022
+
+cd /
+
+/bin/busybox echo -n "Mounting: proc"
+/bin/busybox mount -t proc none /proc
+/bin/busybox echo -n " sys"
+/bin/busybox mount -t sysfs none /sys
+/bin/busybox echo ""
+
+/bin/busybox --install -s
+
+/bin/busybox echo "Ramdisk setup complete, stage separation.."
+
+# Kernel logging output to virtual console 5
+openvt -c 5 echo "======= Kernel log ===== Press ALT F1 to get back ====="
+setlogcons 5
+
+# Go for stage two script  on VT 1, wait
+
+openvt -c 1 -w /bin/sh /scripts/stage2 </dev/tty1 >/dev/tty1 2>&1
+
+while :; do  # forever shell..
+  openvt -c 1 -w /bin/sh </dev/tty1 >/dev/tty1 2>&1
+done 
+echo "ÆÆÆÆÆÆ, off bottom!??!"
+
