@@ -407,7 +407,7 @@ char *change_pw(char *buf, int rid, int vlen, int stat)
    unsigned short acb;
    struct user_V *v;
 
-#ifdef DOCRYPT
+#ifdef DOCRYPTO
    int dontchange = 0;
    int i;
    char md4[32],lanman[32];
