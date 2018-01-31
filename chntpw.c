@@ -349,6 +349,41 @@ void unbind_internetprovider(int rid)
 
 }
 
+unsigned short change_accountbits(unsigned short acb) {
+  char input[20];
+  int bit = 15, pl = 0;
+
+change_acb_init:
+  sam_display_accountbits(acb);
+  puts("First line shows bits 0-2, followed by bits 3-5.");
+
+  while (1) {
+    printf("- - - - Toggling account bits:\n");
+    printf("Hex from 0 to e - toggle this bit");
+    printf("d - Re-explain accountbits");
+    printf("q - Quit editing accountbits");
+
+    pl = fmyinput("Select: [q] > ", input, 16);
+
+    *input = tolower(*input);
+
+    if ((pl < 1) || (*input == 'q')) return acb;
+
+    if (*input == 'd') goto change_acb_init;
+
+    if (!isalnum(*input) || *input > 'e') {
+      puts("Pardon me?");
+      continue;
+    } else if (*input <= '9' && *input > '0') {
+      bit = *input - '0';
+    } else {
+      bit = 0xa + *input - 'a';
+    }
+
+    acb ^= 1u << bit;
+  }
+  return acb;
+}
 
 /* Decode the V-struct, and change the password
  * vofs - offset into SAM buffer, start of V struct
@@ -530,13 +565,15 @@ char *change_pw(char *buf, int rid, int vlen, int stat)
 #ifdef DOCRYPTO
    printf(" 9 - Edit (set new) user password (careful with this on XP or Vista)\n");
 #endif
+   printf(" s - Manually set individual account bits (e.g. re-lock)\n");
+   printf(" e - Manually set all account bits (advanced)\n");
    printf(" q - Quit editing user, back to user select\n");
 
    pl = fmyinput("Select: [q] > ",newp,16);
 
    if ( (pl < 1) || (*newp == 'q') || (*newp == 'Q')) return(0);
 
-
+   // One day this will become switch-case too. Uhhh.
    if (*newp == '2') {
      acb = sam_handle_accountbits(hive[H_SAM], rid,2);
      // return(username);
@@ -632,6 +669,14 @@ char *change_pw(char *buf, int rid, int vlen, int stat)
 
    } /* new password */
 #endif /* DOCRYPT */
+   if (*newp == 's' || *newp == 'S') {
+     acb = change_accountbits(acb);
+   }
+
+   if (*newp == 'e' || *newp == 'E') {
+     puts("Enter a new value in the form of 0x2102, followed by a newline:");
+     scanf("0x%4xh\n", &acb);
+   }
 
    if (pl == 1 && *newp == '1') {
      /* Setting hash lengths to zero seems to make NT think it is blank
