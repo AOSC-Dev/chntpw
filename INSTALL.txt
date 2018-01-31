@@ -31,25 +31,31 @@ Thanks to Denis Ducamp for modifying chntpw to use OpenSSL.
 
 Thanks to Mike Doty, via Alon Bar-Lev for 64 bit build compatible patch.
  (from http://bugs.gentoo.org/show_bug.cgi?id=185411)
-which I may or may not have broken again i 2013...
+which I may or may not have broken again in 2013...
 
-Look into Makefile, you may need to change things to fit your env.
-also if you need 64 bit.
-Warning: I mostly build on 32-bit and may not have tested on 64 bit
-in every version! (32-bit binaries run fine on 64-bit systems anyway,
-and it does not matter if Windows it edits registry from is 32- or 64-bit)
+With all things considered, the Makefile provides the following
+options that can be turned on with "<OPTION>=1":
+ FORCE32  - Force compiler to generate 32-bit code and use integer
+            sizes appropriate for 32 bit.
+ FORCE64  - Change library location from PREFIX/lib to PREFIX/lib64.
+            Only meaningful when using an external library (e.g. OSSL).
+ STATIC   - Generate static binaries. Use a small libc for that.
+            (No, we aren't making static libraries yet.)
+ DOCRYPTO - Put the crypto stuff back in?
 
 If make goes well, you should have:
- chntpw - interactive password tool
- chntpw.static - Completely static passord tool
- reged - Registry edit tool, dynamic linked with libc. No crypto.
- reged.static - Registry tool, statically linked.
+ chntpw - interactive password tool. May use crypto.
+ reged - Registry edit tool, dynamic linked with libc.
  sampasswd - user list and password reset commandline util
- sampasswd.static - same but statically linked
  samusrgrp - group list and group membership tool
- samusrgrp.static - static version of same
  cpnt - Simple copy utility, does not truncate file on write
         Now deprecated, was at least needed earlier for NTFS writes.
+ libsam.so - reusable shared library that includes
+             libsam and ntreg routines
+
+libsam is currently integrated into those binaries.
+You can use "make install" to install them.
+For static enthusiasts, "make libsam.a" is available.
 
 Also, the floppies and CDs are build under a different
 environment for small libc size (uClibc), see website
