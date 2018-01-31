@@ -272,6 +272,7 @@ struct sid_array {
 
 int sam_get_lockoutinfo(struct hive *hdesc, int show);
 short sam_handle_accountbits(struct hive *hdesc, int rid, int mode);
+void sam_display_accountbits(unsigned short acb);
 int sam_get_machine_sid(struct hive *hdesc, char *sidbuf);
 char *sam_sid_to_string(struct sid_binary *sidbuf);
 struct sid_array *sam_make_sid_array(struct sid_binary *sidbuf, int size);

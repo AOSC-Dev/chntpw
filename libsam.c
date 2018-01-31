@@ -158,7 +158,6 @@ short sam_handle_accountbits(struct hive *hdesc, int rid, int mode)
   char s[200];
   struct keyval *v;
   unsigned short acb;
-  int b;
   int max_sam_lock;
 
   if (hdesc->type != HTYPE_SAM) return(0);
@@ -183,15 +182,7 @@ short sam_handle_accountbits(struct hive *hdesc, int rid, int mode)
   acb = f->ACB_bits;
 
   if (mode == 1) {
-    printf("Account bits: 0x%04x =\n",acb);
-
-
-    for (b=0; b < 15; b++) {
-      printf("[%s] %-15.15s | ",
-	     (acb & (1<<b)) ? "X" : " ", acb_fields[b] );
-      if (b%3 == 2) printf("\n");
-    }
-
+    sam_display_accountbits(acb);
     printf("\nFailed login count: %u, while max tries is: %u\n",f->failedcnt,max_sam_lock);
     printf("Total  login count: %u\n",f->logins);
   }
@@ -206,6 +197,17 @@ short sam_handle_accountbits(struct hive *hdesc, int rid, int mode)
     printf("Unlocked!\n");
   }
   return (acb | ( (f->failedcnt > 0 && f->failedcnt >= max_sam_lock)<<15 ) | (acb & ACB_AUTOLOCK)<<15 | (acb & ACB_DISABLED)<<15);
+}
+
+void sam_display_accountbits(unsigned short acb) {
+  int b;
+  printf("Account bits: 0x%04x =\n",acb);
+
+  for (b=0; b < 15; b++) {
+  printf("[%s] %-15.15s | ",
+    (acb & (1<<b)) ? "X" : " ", acb_fields[b] );
+  if (b%3 == 2) printf("\n");
+  }
 }
 
 
