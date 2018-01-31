@@ -478,7 +478,7 @@ char *change_pw(char *buf, int rid, int vlen, int stat)
    cheap_uni2ascii(vp + comment_offset,comment,comment_len);
    cheap_uni2ascii(vp + homedir_offset,homedir,homedir_len);
    
-#if 0
+#ifdef SYSKEY
    /* Reset hash-lengths to 16 if syskey has been reset */
    if (syskeyreset && ntpw_len > 16 && !stat) {
      ntpw_len = 16;
@@ -600,7 +600,7 @@ char *change_pw(char *buf, int rid, int vlen, int stat)
    }
 
 
-#ifdef DOCRYPT
+#ifdef DOCRYPTO
    if (*newp == '9') {   /* Set new password */
 
      if (dontchange) {
@@ -668,7 +668,7 @@ char *change_pw(char *buf, int rid, int vlen, int stat)
 
 
    } /* new password */
-#endif /* DOCRYPT */
+#endif /* DOCRYPTO */
    if (*newp == 's' || *newp == 'S') {
      acb = change_accountbits(acb);
    }
@@ -691,7 +691,7 @@ char *change_pw(char *buf, int rid, int vlen, int stat)
      printf("Password cleared!\n");
    }
    
-#if 0
+#ifdef SYSKEY
    hexprnt("Pw in buffer: ",(vp+ntpw_offs),16);
    hexprnt("Lm in buffer: ",(vp+lmpw_offs),16);
 #endif
@@ -750,52 +750,27 @@ void find_n_change(char *username)
   FREE(v);
 }
 
+#ifdef SYSKEY
 /* Check for presence of syskey and possibly disable it if
  * user wants it.
  * This is tricky, and extremely undocumented!
  * See docs for more info on what's going on when syskey is installed
  */
-
-#undef LSADATA
-
 void handle_syskey(void)
 {
-
-  /* This is \SAM\Domains\Account\F */
-  struct samkeyf {
-    char unknown[0x50];       /* 0x0000 - Unknown. May be machine SID */
-    char unknown2[0x14];
-    char syskeymode;          /* 0x0064 - Type/mode of syskey in use     */
-    char syskeyflags1[0xb];   /* 0x0065 - More flags/settings            */
-    char syskeyobf[0x30];     /* 0x0070 - This may very well be the obfuscated syskey */
-  };    /* There may be more, usually 8 null-bytes? */
-
-  /* Security\Policy\SecretEncryptionKey\@, only on NT5 */
-  /* Probably contains some keyinfo for syskey. Second DWORD seems to be syskeymode */
-  struct secpoldata {
-    int  unknown1;             /* Some kind of flag? usually 1 */
-    int  syskeymode;           /* Is this what we're looking for? */
-    int  unknown2;             /* Usually 0? */
-    char keydata[0x40];        /* Some kind of scrambled keydata? */
-  };
-
-#ifdef LSADATA
-  /* SYSTEM\CurrentControlSet\Control\Lsa\Data, only on NT5?? */
-  /* Probably contains some keyinfo for syskey. Byte 0x34 seems to be mode */
-  struct lsadata {
-    char keydata[0x34];        /* Key information */
-    int  syskeymode;           /* Is this what we're looking for? */
-  };
-#endif
-
   /* void *fdata; */
   struct samkeyf *ff = NULL;
   struct secpoldata *sf = NULL;
-  /* struct lsadata *ld = NULL; */
-  int /* len, */ i,secboot, samfmode, secmode /* , ldmode */ ;
-  struct keyval *samf, *secpol /* , *lsad */ ;
+  int /* len, */ i, secboot, samfmode, secmode;
+  struct keyval *samf, *secpol;
   char *syskeytypes[4] = { "off", "key-in-registry", "enter-passphrase", "key-on-floppy" }; 
   char yn[5];
+
+  #ifdef LSADATA
+  struct lsadata *ld = NULL;
+  int ldmode;
+  struct keyval *lsad;
+  #endif
 
   printf("\n---------------------> SYSKEY CHECK <-----------------------\n");
 
@@ -828,13 +803,15 @@ void handle_syskey(void)
   }
 
 #ifdef LSADATA
-  lsad = get_val2buf(hive[H_SYS], NULL, 0, "\\ControlSet001\\Control\\Lsa\\Data\\Pattern", REG_BINARY, TPF_VK_EXACT);
+  if (H_SYS >= 0) {
+    lsad = get_val2buf(hive[H_SYS], NULL, 0, "\\ControlSet001\\Control\\Lsa\\Data\\Pattern", REG_BINARY, TPF_VK_EXACT);
 
-  if (lsad && lsad->len >= 0x38) {
-    ld = (struct lsadata *)&lsad->data;
-    ldmode = ld->syskeymode;
-  } else {
-    ldmode = -1;
+    if (lsad && lsad->len >= 0x38) {
+      ld = (struct lsadata *)&lsad->data;
+      ldmode = ld->syskeymode;
+    } else {
+      ldmode = -1;
+    }
   }
 #endif
 
@@ -902,7 +879,7 @@ void handle_syskey(void)
 
       }
 
-#if LSADATA
+#if defined(LSADATA) && defined(LSADATA_WRITE)
       if (ld) { 
 
 	ld->syskeymode = 0;
@@ -931,6 +908,7 @@ void handle_syskey(void)
   }
 
 }
+#endif /* SYSKEY */
 
 
 /* Interactive user edit */
@@ -1050,9 +1028,9 @@ void interactive(void)
       printf("  3 - RecoveryConsole settings\n");
       printf("  4 - Show product key (DigitalProductID)\n");
     }
-#if 0
+#if defined(SYSKEY) && defined(SYSKEY_SHOW)
     if (H_SAM >= 0 && H_SYS >= 0 && H_SEC >= 0) {
-      printf("  8 - Syskey status & change\n");
+      printf("  8 - Syskey status & change (dangerous, unnecessary)\n");
     }
 #endif
 
@@ -1070,7 +1048,9 @@ void interactive(void)
       case '2': listgroups(); break;
       case '3': recoveryconsole(); break;
       case '4': cat_dpi(hive[H_SOF],0,"\\Microsoft\\Windows NT\\CurrentVersion\\DigitalProductId"); break;
+#ifdef SYSKEY
       case '8': handle_syskey(); break;
+#endif
       case '9': regedit_interactive(hive, no_hives); break;
       case 'q': return; break;
       }

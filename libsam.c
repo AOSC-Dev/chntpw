@@ -38,6 +38,7 @@
  * 
  */ 
 
+#define SAM_H_BUILDING
 
 #include <stdio.h>
 #include <sys/types.h>

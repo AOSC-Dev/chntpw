@@ -34,7 +34,7 @@ Thanks to Mike Doty, via Alon Bar-Lev for 64 bit build compatible patch.
 which I may or may not have broken again in 2013...
 
 With all things considered, the Makefile provides the following
-options that can be turned on with "<OPTION>=1":
+options that can be turned on with "make <OPTION>=1":
  FORCE32  - Force compiler to generate 32-bit code and use integer
             sizes appropriate for 32 bit.
  FORCE64  - Change library location from PREFIX/lib to PREFIX/lib64.
@@ -42,6 +42,14 @@ options that can be turned on with "<OPTION>=1":
  STATIC   - Generate static binaries. Use a small libc for that.
             (No, we aren't making static libraries yet.)
  DOCRYPTO - Put the crypto stuff back in?
+
+In addition, you can set CFLAGS_MOREDEFS to toggle those highly
+dangerous, outdated features:
+ -DSYSKEY - Allow disabling syskey. On by default.
+ -DSYSKEY_SHOW - Show syskey in menu. On by default.
+ -DLSADATA - Look at LsaData. On by default.
+ -DLSADATA_WRITE - Write to LsaData. Off by default.
+Previously only the equivalent of -DSYSKEY was enabled.
 
 If make goes well, you should have:
  chntpw - interactive password tool. May use crypto.

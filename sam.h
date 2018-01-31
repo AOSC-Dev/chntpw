@@ -106,29 +106,10 @@ struct user_F {
 /* Seems not to be used on failed console logins at least */
 #define ACB_AUTOLOCK   0x0400  /* Account auto locked */
 
-/* Account Bits Fields strings (defined in libsam.c)
-
-char *acb_fields[16] = {
-   "Disabled" ,
-   "Homedir req." ,
-   "Passwd not req." ,
-   "Temp. duplicate" ,
-   "Normal account" ,
-   "NMS account" ,
-   "Domain trust act." ,
-   "Wks trust act." ,
-   "Srv trust act" ,
-   "Pwd don't expire" ,
-   "Auto lockout" ,
-   "(unknown 0x08)" ,
-   "(unknown 0x10)" ,
-   "(unknown 0x20)" ,
-   "(unknown 0x40)" ,
-   "(unknown 0x80)" ,
-};
-
-*/
-
+/* Account Bits Fields strings (defined in libsam.c) */
+#ifndef SAM_H_BUILDING
+extern char* acb_fields[16];
+#endif
 
 /* Users V data struct */
 /* First 0xCC bytes is pointer & len table, rest is data which
@@ -267,6 +248,32 @@ struct sid_array {
   struct sid_binary *sidptr;
 };
 
+/* Speculated Syskey information. You don't want to change this. */
+
+/* This is \SAM\Domains\Account\F */
+struct samkeyf {
+  char unknown[0x50];       /* 0x0000 - Unknown. May be machine SID */
+  char unknown2[0x14];
+  char syskeymode;          /* 0x0064 - Type/mode of syskey in use     */
+  char syskeyflags1[0xb];   /* 0x0065 - More flags/settings            */
+  char syskeyobf[0x30];     /* 0x0070 - This may very well be the obfuscated syskey */
+};    /* There may be more, usually 8 null-bytes? */
+
+/* Security\Policy\SecretEncryptionKey\@, only on NT5 */
+/* Probably contains some keyinfo for syskey. Second DWORD seems to be syskeymode */
+struct secpoldata {
+  int  unknown1;             /* Some kind of flag? usually 1 */
+  int  syskeymode;           /* Is this what we're looking for? */
+  int  unknown2;             /* Usually 0? */
+  char keydata[0x40];        /* Some kind of scrambled keydata? */
+};
+
+/* SYSTEM\CurrentControlSet\Control\Lsa\Data, only on NT5?? */
+/* Probably contains some keyinfo for syskey. Byte 0x34 seems to be mode */
+struct lsadata {
+  char keydata[0x34];        /* Key information */
+  int  syskeymode;           /* Is this what we're looking for? */
+};
 
 /* libsam.c functions */
 
