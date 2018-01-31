@@ -7,13 +7,17 @@ This is free software, licensed under the following:
 
 "ntreg" (the registry library) and
 "libsam" (SAM manipulation library, user, groups etc)
-is licensed under the GNU Lesser Public License. See LGPL.txt.
+are licensed under the GNU Lesser Public License, v. 2.1.
+See LGPL.txt.
 
 "chntpw" (the password reset / registry editor frontend)
 "reged" (registry editor, export and import tool)
 "sampasswd" (password reset command line program)
 "samusrgrp" (user and group command line program)
-is licensed under the GNU General Public License, see GPL.txt.
+"samunlock" (user unlock command line program)
+"bootable/" (files for bootable media)
+are licensed under the GNU General Public License, v2.
+See GPL.txt.
 
 
 For manual to the different commands, see MANUAL.txt
