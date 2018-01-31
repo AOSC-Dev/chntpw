@@ -46,28 +46,29 @@ CFLAGS= -fpic -g -O2 -I. -I$(OSSLINC) -Wall -Wextra $(CFLAGS_FORCE32_$(FORCE32))
 OSSLLIB=$(OSSLPATH)/lib$(OSSLLIB_FORCE64_$(FORCE64))
 
 # This is to link with whatever we have
-LIBS= -L$(OSSLLIB) $(LDFLAGS_STATIC_$(STATIC)) $(LIBS_DOCRYPTO_$(DOCRYPTO))
+LIBS= -L$(OSSLLIB) $(LIBS_DOCRYPTO_$(DOCRYPTO))
 LDFLAGS= -O2 -Wl,-O1,--sort-common,--as-needed
+LDFLAGS_BIN=$(LDFLAGS) $(LDFLAGS_STATIC_$(STATIC)) 
 
 all: chntpw cpnt reged samusrgrp sampasswd samunlock libsam.so
 
 chntpw: chntpw.o ntreg.o edlib.o libsam.o
-	$(CC) $(LDFLAGS) -o chntpw chntpw.o ntreg.o edlib.o libsam.o $(LIBS)
+	$(CC) $(LDFLAGS_BIN) -o chntpw chntpw.o ntreg.o edlib.o libsam.o $(LIBS)
 
 cpnt: cpnt.o
-	$(CC) $(LDFLAGS) -o cpnt cpnt.o
+	$(CC) $(LDFLAGS_BIN) -o cpnt cpnt.o
 
 reged: reged.o ntreg.o edlib.o
-	$(CC) $(LDFLAGS) -o reged reged.o ntreg.o edlib.o
+	$(CC) $(LDFLAGS_BIN) -o reged reged.o ntreg.o edlib.o
 
 samusrgrp: samusrgrp.o ntreg.o libsam.o
-	$(CC) $(LDFLAGS) -o samusrgrp samusrgrp.o ntreg.o libsam.o
+	$(CC) $(LDFLAGS_BIN) -o samusrgrp samusrgrp.o ntreg.o libsam.o
 
 sampasswd: sampasswd.o ntreg.o libsam.o
-	$(CC) $(LDFLAGS) -o sampasswd sampasswd.o ntreg.o libsam.o
+	$(CC) $(LDFLAGS_BIN) -o sampasswd sampasswd.o ntreg.o libsam.o
 
 samunlock: samunlock.o ntreg.o libsam.o
-	$(CC) $(LDFLAGS) -o samunlock samunlock.o ntreg.o libsam.o
+	$(CC) $(LDFLAGS_BIN) -o samunlock samunlock.o ntreg.o libsam.o
 
 libsam.so: libsam.o ntreg.o dummy_gverbose.o
 	$(CC) $(LDFLAGS) -shared -o libsam.so $^
