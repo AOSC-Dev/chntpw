@@ -394,8 +394,11 @@ void hexprnt(char *s, unsigned char *bytes, int len);
 void hexdump(void *hbuf, int start, int stop, int ascii);
 int find_in_buf(char *buf, char *what, int sz, int len, int start);
 int get_int( char *array );
+
+/* UTF-16LE/Latin-1 routines without range-checking. */
 void cheap_uni2ascii(char *src, char *dest, int l);
 void cheap_ascii2uni(char *src, char *dest, int l);
+
 void skipspace(char **c);
 int gethex(char **c);
 int gethexorstr(char **c, char *wb);
@@ -439,6 +442,7 @@ void import_reg(struct hive *hdesc, char *filename, char *prefix);
 
 int de_escape(char *s, int wide);
 
+/* UTF8/UTF16-LE routines. */
 char *string_regw2prog(void *string, int len);
 
 

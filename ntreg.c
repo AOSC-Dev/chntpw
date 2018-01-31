@@ -302,7 +302,7 @@ int get_int( char *array )
 }
 
 
-/* Quick and dirty UNICODE to std. ascii */
+/* Quick and dirty UNICODE (utf16le) to std. ascii */
 
 void cheap_uni2ascii(char *src, char *dest, int l)
 {
@@ -315,7 +315,7 @@ void cheap_uni2ascii(char *src, char *dest, int l)
 }
 
 
-/* Quick and dirty ascii to unicode */
+/* Quick and dirty ascii to unicode (utf16le) */
 
 void cheap_ascii2uni(char *src, char *dest, int l)
 {
@@ -3158,9 +3158,11 @@ int put_dword(struct hive *hdesc, int vofs, char *path, int exact, int dword)
  * Then expanded a bit to handle more types etc.
  */
 
+/* UTF8(prog)/UTF16-LE(w)/Latin-1(a) routines. */
+
 /*
- * converts a value string from an registry entry into a c string. It does not
- * use any encoding functions.
+ * converts a value string from an registry entry into a utf-8 c string.
+ * It does not use any encoding functions.
  * It works very primitive by just taking every second char.
  * The caller must free the resulting string, that was allocated with malloc.
  *
@@ -3239,6 +3241,7 @@ string_rega2prog(void *string, int len)
     return cstring;
 }
 
+/* Only safe for char <= 0xFF. */
 static void
 string_prog2rega(char *string, int len)
 {
@@ -3252,7 +3255,7 @@ string_prog2rega(char *string, int len)
             *out++ = (in[0] & 0x1f) << 6 | (in[1] & 0x3f);
             ++in;
         } else if (in[1] && in[2]) {
-            /* assume 3 byte*/
+            /* assume 3 byte */
             *out++ = (in[1] & 0xf) << 6 | (in[2] & 0x3f);
             in += 2;
         }
@@ -3278,7 +3281,7 @@ string_prog2regw(void *string, int len, int *out_len)
             *out++ = (in[0] & 0x1f) >> 2;
             ++in, --len;
         } else if (len >= 3) {
-            /* assume 3 byte*/
+            /* assume 3 byte */
             *out++ = (in[1] & 0xf) << 6 | (in[2] & 0x3f);
             *out++ = (in[0] & 0xf) << 4 | ((in[1] & 0x3f) >> 2);
             in += 2;
