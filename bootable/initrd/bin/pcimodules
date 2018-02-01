@@ -1,0 +1,47 @@
+#!/bin/sh
+# sysmodules - List kernel driver modules available for sysfs devices
+# 
+# Copyright (c) 2017 Mingye Wang (Artoria2e5) <arthur200126@gmail.com>
+# Dedicated to the Public Domain under Creative Commons Zero 1.0.
+#
+# Compares modules.alias to devices with modalias.
+# Eq. to http://lists.busybox.net/pipermail/busybox/2012-December/078719.html
+# 
+# POSIX sh implementation, assume busybox util extensions
+
+if [ "$1" = "--help" ]; then
+  cat << EOF
+sysmodules - List kernel driver modules available for sysfs devices
+Usage: sysmodules
+       for m in `sysmodules`; do modprobe "$m"; done
+EOF
+  exit 0
+fi
+
+# Generate a list of modaliases
+devices=$(
+  find /sys/devices -name modalias -print0 |
+  xargs -0 cat |
+  LC_ALL=C sort -u)
+
+# Load into "$@".
+IFS='
+' # NL
+set -f
+set -- $devices
+set +f
+
+# Read modules.alias and match.
+IFS=' ' # SP
+while read -r head aliaspat mod junk; do
+  [ "$head" = alias ] || continue
+  for i; do
+    case $i in
+      $aliaspat)
+        # naive deduplication
+        [ "$last" != "$mod" ] || continue
+        printf '%s\n' "$mod"
+        last="$mod";;
+    esac
+  done
+done < /lib/modules/`uname -r`/modules.alias
