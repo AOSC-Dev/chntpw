@@ -34,14 +34,13 @@ set +f
 # Read modules.alias and match.
 IFS=' ' # SP
 while read -r head aliaspat mod junk; do
-  [ "$head" = alias ] || continue
+  [ "$head" = alias ] && [ "$last" != "$mod" ] || continue
   for i; do
     case $i in
       $aliaspat)
-        # naive deduplication
-        [ "$last" != "$mod" ] || continue
         printf '%s\n' "$mod"
-        last="$mod";;
+        last="$mod"
+        break;;
     esac
   done
 done < /lib/modules/`uname -r`/modules.alias
