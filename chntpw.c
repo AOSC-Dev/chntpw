@@ -359,9 +359,9 @@ change_acb_init:
 
   while (1) {
     printf("- - - - Toggling account bits:\n");
-    printf("Hex from 0 to e - toggle this bit");
-    printf("d - Re-explain account bits");
-    printf("q - Quit editing account bits");
+    printf("Hex from 0 to e - toggle this bit\n");
+    printf("d - Re-explain account bits\n");
+    printf("q - Quit editing account bits\n");
 
     pl = fmyinput("Select: [q] > ", input, 16);
 
