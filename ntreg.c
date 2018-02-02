@@ -227,14 +227,18 @@ char *mem_str( const char *str, int len )
 
 int fmyinput(char *prmpt, char *ibuf, int maxlen)
 {
-   
+   int len;
    printf("%s",prmpt);
    
    fgets(ibuf,maxlen+1,stdin);
+   len = strlen(ibuf);
    
-   ibuf[strlen(ibuf)-1] = 0;
-   
-   return(strlen(ibuf));
+   if (len) {
+      ibuf[len-1] = 0;
+      --len;
+    }
+
+   return len;
 }
 
 /* Print len number of hexbytes */
@@ -4252,6 +4256,14 @@ struct hive *openHive(char *filename, int mode)
   if (rt < hdesc->size) {
     fprintf(stderr,"Could not read file, got %d bytes while expecting %d\n",
 	    r, hdesc->size);
+    closeHive(hdesc);
+    return(NULL);
+  }
+
+  if (r < sizeof (*hdesc)) {
+    fprintf(stderr,
+	    "file is too small; got %d bytes while expecting %d or more\n",
+	    r, sizeof (*hdesc));
     closeHive(hdesc);
     return(NULL);
   }
