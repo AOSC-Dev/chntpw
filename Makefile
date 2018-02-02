@@ -100,5 +100,7 @@ install: all
 	cp sam.h ntreg.h $(DESTDIR)$(PREFIX)/include
 	mkdir -p $(DESTDIR)$(PREFIX)/doc/chntpw
 	cp *.txt $(DESTDIR)$(PREFIX)/doc/chntpw
+	mkdir -p $(DESTDIR)$(PREFIX)/man/man8
+	cp man/*.8 $(DESTDIR)$(PREFIX)/man/man8
 
 print-% : ; $(info $* is a $(flavor $*) variable set to [$($*)]) @true
