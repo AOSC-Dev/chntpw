@@ -1511,6 +1511,7 @@ int get_abs_path(struct hive *hdesc, int nkofs, char *path, int maxlen)
   }
 
   strncpy(tmp,path,ABSPATHLEN-1);
+  tmp[ABSPATHLEN-1] = '\0';
 
   if (key->type & 0x20)
     keyname = mem_str(key->keyname, key->len_name);
