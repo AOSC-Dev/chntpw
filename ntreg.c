@@ -3498,7 +3498,14 @@ void export_key(struct hive *hdesc, int nkofs, char *name, char *filename, char 
 
     fprintf(file,"\r\n"); /* Must end file with an empty line, windows does that */
 
-    fclose(file);
+    if (ferror (file)) {
+	printf("failed to write file '%s'\n", filename);
+	fclose (file);
+	return;
+    }
+    if (fclose(file))
+      printf("failed to write file '%s': %s\n", filename,
+	     strerror(errno));
 }
 
 /* ================================================================ */
