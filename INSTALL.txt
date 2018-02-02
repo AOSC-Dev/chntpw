@@ -42,6 +42,7 @@ options that can be turned on with "make <OPTION>=1":
  STATIC   - Generate static binaries. Use a small libc for that.
             (No, we aren't making static libraries yet.)
  DOCRYPTO - Put the crypto stuff back in?
+            Use "1_GCRPT" for grcypto.
 
 In addition, you can set CFLAGS_MOREDEFS to toggle those highly
 dangerous, outdated features:

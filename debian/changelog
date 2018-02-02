@@ -1,3 +1,8 @@
+chntpw (1.1-1) unstable; urgency=low
+  * chntpw.c
+        add option for editing all ACBs
+        fix typo on DOCRYPTO
+
 chntpw (1.0-2) unstable; urgency=low
 
   * debian/patches/12_samusrgrp.c_interactive_typo:

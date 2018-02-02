@@ -16,6 +16,7 @@
  * 2010-jun: Syskey not visible in menu, but is selectable (2)
  * 2010-apr: Interactive menu adapts to show most relevant
  *           selections based on what is loaded
+ * 2008-may: port to libgcrypt to avoid GPL/OpenSSL incompatibility [Debian]
  * 2008-mar: Minor other tweaks
  * 2008-mar: Interactive reg ed moved out of this file, into edlib.c
  * 2008-mar: 64 bit compatible patch by Mike Doty, via Alon Bar-Lev
@@ -82,8 +83,14 @@
  */
 
 #ifdef DOCRYPTO
+#if defined(USEOPENSSL)
 #include <openssl/des.h>
 #include <openssl/md4.h>
+#elif defined(USELIBGCRYPT)
+  #include <gcrypt.h>
+#else
+  #error No DES encryption and MD4 hashing library found
+#endif
 #endif
 
 #define uchar u_char
@@ -158,7 +165,9 @@ void str_to_key(unsigned char *str,unsigned char *key)
 	for (i=0;i<8;i++) {
 		key[i] = (key[i]<<1);
 	}
+#if defined(USEOPENSSL)
 	DES_set_odd_parity((des_cblock *)key);
+#endif
 }
 
 /*
@@ -203,6 +212,7 @@ void sid_to_key2(uint32_t sid,unsigned char deskey[8])
 
 void E1(uchar *k, uchar *d, uchar *out)
 {
+#if defined(USEOPENSSL)
   des_key_schedule ks;
   des_cblock deskey;
 
@@ -213,6 +223,15 @@ void E1(uchar *k, uchar *d, uchar *out)
   des_set_key((des_cblock *)deskey,ks);
 #endif /* __FreeBsd__ */
   des_ecb_encrypt((des_cblock *)d,(des_cblock *)out, ks, DES_ENCRYPT);
+#elif defined(USELIBGCRYPT)
+  gcry_cipher_hd_t ks;
+  uchar deskey[8];
+  str_to_key(k,deskey);
+  gcry_cipher_open(&ks, GCRY_CIPHER_DES, GCRY_CIPHER_MODE_ECB, 0);
+  gcry_cipher_setkey(ks, deskey, 8);
+  gcry_cipher_encrypt(ks, out, 8, d, 8);
+  gcry_cipher_close(ks);
+#endif
 }
 
 #endif   /* DOCRYPTO */
@@ -417,9 +436,16 @@ char *change_pw(char *buf, int rid, int vlen, int stat)
    int i;
    char md4[32],lanman[32];
    char newunipw[34], despw[20], newlanpw[16], newlandes[20];
+#ifdef USEOPENSSL
    des_key_schedule ks1, ks2;
    des_cblock deskey1, deskey2;
    MD4_CTX context;
+#elif defined(USELIBGCRYPT)
+   gcry_cipher_hd_t ks1, ks2;
+   uchar deskey1[8], deskey2[8];
+   unsigned char *p;
+   gcry_md_hd_t context;
+#endif
    unsigned char digest[16];
    uchar x1[] = {0x4B,0x47,0x53,0x21,0x40,0x23,0x24,0x25};
 #endif
@@ -534,6 +560,7 @@ char *change_pw(char *buf, int rid, int vlen, int stat)
    }
 
 #ifdef DOCRYPTO
+#if defined(USEOPENSSL)
    /* Get the two decrpt keys. */
    sid_to_key1(rid,(unsigned char *)deskey1);
    des_set_key((des_cblock *)deskey1,ks1);
@@ -551,6 +578,25 @@ char *change_pw(char *buf, int rid, int vlen, int stat)
 		   (des_cblock *)lanman, ks1, DES_DECRYPT);
    des_ecb_encrypt((des_cblock *)(vp+lmpw_offs + 8),
 		   (des_cblock *)&lanman[8], ks2, DES_DECRYPT);
+#elif defined(USELIBGCRYPT)
+   /* Start the keys */
+   gcry_cipher_open(&ks1, GCRY_CIPHER_DES, GCRY_CIPHER_MODE_ECB, 0);
+   gcry_cipher_open(&ks2, GCRY_CIPHER_DES, GCRY_CIPHER_MODE_ECB, 0);
+
+   /* Get the two decrpt keys. */
+   sid_to_key1(rid,deskey1);
+   gcry_cipher_setkey(ks1, deskey1, 8);
+   sid_to_key2(rid,deskey2);
+   gcry_cipher_setkey(ks2, deskey2, 8);
+
+   /* Decrypt the NT md4 password hash as two 8 byte blocks. */
+   gcry_cipher_decrypt(ks1, md4, 8, vp+ntpw_offs, 8);
+   gcry_cipher_decrypt(ks2, &md4[8], 8, vp+ntpw_offs+8, 8);
+
+   /* Decrypt the lanman password hash as two 8 byte blocks. */
+   gcry_cipher_decrypt(ks1, lanman, 8, vp+lmpw_offs, 8);
+   gcry_cipher_decrypt(ks2, &lanman[8], 8, vp+lmpw_offs+8, 8);
+#endif
       
    if (gverbose) {
      hexprnt("MD4 hash     : ",(unsigned char *)md4,16);
@@ -626,9 +672,17 @@ char *change_pw(char *buf, int rid, int vlen, int stat)
 
      /*   printf("Ucase Lanman: %s\n",newlanpw); */
    
+#if defined(USEOPENSSL)
      MD4Init (&context);
      MD4Update (&context, newunipw, pl<<1);
      MD4Final (digest, &context);
+#elif defined(USELIBGCRYPT)
+     gcry_md_open(&context, GCRY_MD_MD4, 0);
+     gcry_md_write(context, newunipw, pl<<1);
+     p = gcry_md_read(context, GCRY_MD_MD4);
+     if(p) memcpy(digest, p, gcry_md_get_algo_dlen(GCRY_MD_MD4));
+     gcry_md_close(context);
+#endif
      
      if (gverbose) hexprnt("\nNEW MD4 hash    : ",digest,16);
      
@@ -637,6 +691,7 @@ char *change_pw(char *buf, int rid, int vlen, int stat)
      
      if (gverbose) hexprnt("NEW LANMAN hash : ",(unsigned char *)lanman,16);
      
+#if defined(USEOPENSSL)
      /* Encrypt the NT md4 password hash as two 8 byte blocks. */
      des_ecb_encrypt((des_cblock *)digest,
 		     (des_cblock *)despw, ks1, DES_ENCRYPT);
@@ -647,6 +702,18 @@ char *change_pw(char *buf, int rid, int vlen, int stat)
 		     (des_cblock *)newlandes, ks1, DES_ENCRYPT);
      des_ecb_encrypt((des_cblock *)(lanman+8),
 		     (des_cblock *)&newlandes[8], ks2, DES_ENCRYPT);
+#elif defined(USELIBGCRYPT)
+     /* Encrypt the NT md4 password hash as two 8 byte blocks. */
+     gcry_cipher_encrypt(ks1, despw, 8, digest, 8);
+     gcry_cipher_encrypt(ks2, &despw[8], 8, digest+8, 8);
+
+     gcry_cipher_encrypt(ks1, newlandes, 8, lanman, 8);
+     gcry_cipher_encrypt(ks2, &newlandes[8], 8, lanman+8, 8);
+
+     /* Close keys, not needed after this */
+     gcry_cipher_close(ks1);
+     gcry_cipher_close(ks2);
+#endif
      
      if (gverbose) {
        hexprnt("NEW DES crypt   : ",(unsigned char *)despw,16);
