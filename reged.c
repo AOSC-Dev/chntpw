@@ -167,6 +167,11 @@ int main(int argc, char **argv)
 
   if (edit) {  /* Call editor. Rest of arguments are considered hives to load */
     hivename = argv[optind+no_hives];
+    if (!hivename) {
+      fprintf(stderr,"with -e you must specify at least one hive file name\n");
+      usage();
+      exit(1);
+    }
     do {
       if (!(hive[no_hives] = openHive(hivename,
 				      HMODE_RW|mode))) {
