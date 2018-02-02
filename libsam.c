@@ -18,7 +18,10 @@
  *
  *****
  *
- * Copyright (c) 1997-2013 Petter Nordahl-Hagen.
+ * Copyright (c) 1997-2014 Petter Nordahl-Hagen.
+ * Copyright (c) 2014 Adrian Gibanel.
+ * Copyright (c) 2016 Googulator.
+ * Copyright (c) 2018 Mingye Wang (Artoria2e5).
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

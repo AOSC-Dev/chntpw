@@ -5,6 +5,7 @@
  * account bits for a user in the SAM database
  *
  * Changes:
+ * 2016 - unbind user from internet
  * 2013 - aug: cleaned up a bit for release, some debug still there
  * 2013 - apr-may: reset one, all and first features
  * 2012 - oct: First version, some code from earlier chntpw.c. Not released.
@@ -12,6 +13,7 @@
  *****
  *
  * Copyright (c) 1997-2014 Petter Nordahl-Hagen.
+* Copyright (c) 2016 Googulator.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

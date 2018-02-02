@@ -41,7 +41,10 @@
  *****
  *
  * Copyright (c) 1997-2014 Petter Nordahl-Hagen.
- *
+ * Copyright (c) 2014 Adrian Gibanel.
+ * Copyright (c) 2016 Googulator.
+ * Copyright (c) 2018 Mingye Wang (Artoria2e5).
+ * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; version 2 of the License.
@@ -91,7 +94,7 @@
 #include "ntreg.h"
 #include "sam.h"
 
-const char chntpw_version[] = "chntpw version 1.00 140201, (c) Petter N Hagen";
+const char chntpw_version[] = "chntpw version 1.1.0 180202, (c) Petter N Hagen &c.";
 
 extern char *val_types[REG_MAX+1];
 
@@ -1098,7 +1101,7 @@ int main(int argc, char **argv)
   char iwho[100];
   FILE *ch;     /* Write out names of touched files to this */
    
-  char *options = "LENidehflvu:";
+  char *options = "LENidehlvu:";
   
   while((c=getopt(argc,argv,options)) > 0) {
     switch(c) {
