@@ -1,7 +1,12 @@
 *.o
 *.static
+*.exe
+*.a
+*.so
+*.swp
 reged
 chntpw
 samusrgrp
+samunlock
 cpnt
 sampasswd

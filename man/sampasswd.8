@@ -2,7 +2,7 @@
 .\" First parameter, NAME, should be all caps
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
-.TH SAMPASSWD 8  "6th August 2014"
+.TH SAMPASSWD 8  "2nd February 2018"
 .\" Please adjust this date whenever revising the manpage.
 .\"
 .\" Some roff macros, for reference:
@@ -70,6 +70,10 @@ Do not allocate more information, only allow the editing of existing values with
 .B \-E
 Do not expand the hive file (safe mode).
 .TP
+.B \-U
+Unbind user(s) from Internet credential providers (e.g. MS accounts)
+and convert them to local ones.
+.TP
 .B \-t
 Print debug information of allocated blocks.
 .TP
@@ -95,6 +99,12 @@ Reset the password of the administrative users with the lowest RID number.
 This does not include the built-in administrator (0x1f4) unless no other
 administrative user can be found in the database file.
 
+.TP
+.B samusrgrp -r -U
+For any user whose password is being reset, also unbind the user
+from any Internet-based credential providers it may be bound to.
+This is useful for regaining access to Microsoft accounts on
+Windows 8 and up (the account will be converted to local user).
 
 .SH KNOWN BUGS
 
