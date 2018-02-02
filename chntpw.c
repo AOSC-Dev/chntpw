@@ -515,7 +515,7 @@ char *change_pw(char *buf, int rid, int vlen, int stat)
      ntpw_len = 16;
      lmpw_len = 16;
      ntpw_offs -= 4;
-     (unsigned int)*(vp+0xa8) = ntpw_offs - 0xcc;
+     *(vp + 0xa8) = (unsigned int)(ntpw_offs - 0xcc);
      *(vp + 0xa0) = 16;
      *(vp + 0xac) = 16;
    }
