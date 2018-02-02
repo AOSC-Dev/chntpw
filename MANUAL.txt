@@ -15,14 +15,14 @@ SYSTEM - HKEY_LOCAL_MACHINE\SYSTEM: System settings / configuration
 SOFTWARE - HKEY_LOCAL_MACHINE\SOFTARE: Config and info of installed
            software and a lot of higher level windows config
 
-Note that these programs (and the registry library they use) does not
-join all these files in the same tree like windows does.
+Note that these programs (and the registry library they use) do not
+join all these files in the same tree like Windows does.
 For example, a path like
 HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\Control
 is not valid, it is instead just
 ControSet001\Control
 (after selecting the hive if more than one is loaded)
-But except if you use the registry edit or export/import functions you
+But, unless you use the registry edit or export/import functions, you
 do not need think about this as for other things the tools handle
 this.
 
@@ -49,65 +49,65 @@ My boot CD runs this with options -i -L SAM
 
 
 
- -u <user>   Username or RID (0x3e9 for example) to interactively edit
+ -u <user>   Username or RID (0x3e9 for example) to edit interactively
 
-Invoke the interactive edit menu on specified user.
-Specifying a user name will most likely fail if user has international
-character, so better to use user ID (RID), for example
+Invoke the interactive edit menu on the specified user.
+Specifying a user name will most likely fail if the username has international
+characters, so itis better to use the user's ID (RID), for example
  chnptw -u 0x3e9 SAM
-to edit user with hexadecimal RID 3e9
+to edit the user with hexadecimal RID 3e9
 
 
- -l          list all users in SAM file and exit
+ -l          list all users in the SAM file and exit
 
-Just that, list users in human readable form, with some info about if
-user is admin and if password is set.
+Just that, list all the users in human readable form, with some information
+about the user, such as if the user is an administrator user and if the password is set.
 
  -i          Interactive Menu system
 
 Invokes the menu system. Menu items will vary a bit depending on what
 registry hives are loaded.
 
- -f          Interactively edit first admin user
+ -f          Interactively edit the first admin user
 
-Select first admin user for edit. This is user with lowest RID that
-also is member of administators group, or built-in user 0x1f4 if not
-others possible.
+Select the first admin user for edit. This is the user with the lowest RID that
+also is member of the administrators group, or the built-in user 0x1f4 if no
+other users are found.
 
  -e          Registry editor. Now with full write support!
 
-Enter the registry editor. It is a small command system. ? for help
-there. See other documentation for more on regedits.
+Enter the registry editor. It is a small command system. Press '?' for help
+there. See other documentation for more information on regedits.
 
- -d          Enter buffer debugger instead (hex editor), 
+ -d          Enter the buffer debugger instead (hex editor), 
 
-Command line type hex editor, mostly for debugging purposes. ? for help.
+Command line type hex editor, mostly used for debugging purposes. ? for help.
 
- -v          Be a little more verbose (for debuging)
+ -v          Be a little more verbose (for debugging)
 
 Lots of debug output during most operations (especially hive loading)
 
  -L          For scripts, write names of changed files to /tmp/changed
 
 If any of the other functions changes the registry, the changed files
-are listed here. Can be used by wrapper scripts to know what to save.
+are listed here. This option can be used by wrapper scripts to know what to save.
 My boot CD uses it.
 
  -N          No allocation mode. Only same length overwrites possible (very safe mode)
 
-Safe mode. Will only allow changes in registry that overwrites old
-values with same length data. Password reset only changes 2 bytes, and
-does not change value lenght, so password reset will still work in
+Safe mode. This option will only allow changes in the registry that overwrite old
+values with the same length data. Password reset only changes 2 bytes, and
+does not change value length, so password resets will still work in
 this safe mode. If something tries to violate this safe mode, a lot of
-error messages (some of the rather obscure) may occur.
+error messages (some of them rather obscure) may be shown.
 
  -E          No expand mode, do not expand hive file (safe mode)
 
 Safe mode. Does not allow expanding the size of the file, but will
-allow adding keys/values as long as there is free space in the file
+allow adding keys/values as long as there is enough free space in the file
 already. (most files contains some free space)
 If expansion is needed but not allowed by this option,
-a lot of obscure error messages may occur, and file should not be saved.
+a lot of obscure error messages may be show, and the file should not be saved.
 
 -------------------------------------------------------------------------
 
@@ -155,10 +155,10 @@ Examples:
 
   reged -x system HKEY_LOCAL_MACHINE\\SYSTEM ControlSet001 output.reg
 
-should export everything below ControlSet001 key from registry hive
-file named system into .reg file named output.reg, using
+should export everything below ControlSet001 key from the registry hive
+file named 'system' into the .reg file named 'output.reg', using
 HKEY_LOCAL_MACHINE\SYSTEM in front of every key name in the .reg file.
-(in most shells \\ is needed to ignore the meaning \ has to the shell)
+(in most shells \\ is needed to ignore the meaning '\' has to the shell)
 
   reged -x system HKEY_LOCAL_MACHINE\\SYSTEM ControlSet001\\Enum output.reg
 
@@ -166,7 +166,7 @@ same, but start from ControlSet001\Enum
 
   reged -x system HKEY_LOCAL_MACHINE\\SYSTEM \\ output.reg
 
-export everything in the system file
+exports everything in the system file
 
 
 
@@ -174,12 +174,12 @@ export everything in the system file
      Import from .reg file. Where <prefixstring> for example is HKEY_LOCAL_MACHINE\SOFTWARE
      Only one .reg and one hive file supported at the same time
 
-Reverse of -x, this reads from a .reg file and puts it into the hive
-file, just like regedit.exe foobar.reg will do in windows.
-The <prefixstring> is removed from the start of each key name, if you
+This option is the opposite of -x: it reads from a .reg file and puts it into the hive
+file, just like 'regedit.exe foobar.reg' will do in Windows.
+The <prefixstring> is removed from the beginning of each key name, if you
 specify this wrong, the result may not be what you expected.
 KNOWN PROBLEM: This routine is slow, very slow indeed on binary values (has
-hex numbers in .reg file). May take over 5 minutes to import a file
+hex numbers in .reg file). It may take over 5 minutes to import a file
 the size of a normal XP software-hive .reg export.
 Problems / unusual things in the .reg file may cause crash or
 unexpected data or some times even an error messsage! :)
@@ -190,10 +190,10 @@ KNOWN PROBLEMS: May bork on some wide character (UTF16) .reg files.
   -e <registryhive> ...
      Interactive edit one or more of registry files
 
-Enter the registry editor. It is a small command system. ? for help
+Enter the registry editor. This is a small command system. Press '?' for help
 there. See other documentation for more on regedits.
-If both -I and -e given, editor will be entered after import, but
-before save, so you can check things if you need.
+If both -I and -e given, editor will be entered after importing, but
+before saving, so you can check things if you need.
 
 
  Options:
@@ -292,12 +292,12 @@ Export to .reg file, same as -x option above
 
 samusrgrp
 is a command line tool to add users to groups or remove users from
-groups. Users and groups must be local (cannot be domain / AD).
+groups. Users and groups must be local (i.e. they cannot be domain / AD).
 It can also list the groups with their members in several forms, the
-output can be used in scripts of course.
+output can be used in scripts as it is provided in machine readable format.
 
 Listing groups will also list domain users that are members of the
-group (if any), but it will not be able to look up the name, so it
+group (if any), but it will not be able to look up the name, so they
 will be listed as a SID only.
 
   samusrgrp version 0.2 130501, (c) Petter N Hagen
@@ -310,7 +310,7 @@ will be listed as a SID only.
      -L = list groups and also their members
      -s = Print machine SID
 
-For add or remove, you must also specify a bit more info:
+To add or remove a user, you must also specify some more information:
 
   Parameters:
      <user> can be given as a username or a RID in hex with 0x in front
@@ -356,9 +356,9 @@ Members RID (hex)
 Members name (if available, else SID)
 Members SID
 
-So in this example, the Guests group have 2 members: Administrator and
+So in this example, the Guests group has 2 members: Administrator and
 Guest.
-At the time of writing this, it WILL NOT LIST EMPTY GROUPS (no
+At the time of writing this, it WILL NOT LIST EMPTY GROUPS (groups with no
 members). I plan to change this, empty groups on one line with -1 in
 member number field, and rest of user fields empty.
 
@@ -430,7 +430,7 @@ Fields are:
 
 User RID (hex)
 User name
-Is user admin? (1 = yes, 0 = no) (member of group ID 0x220)
+Is the user an administrator? (1 = yes, 0 = no) (member of group ID 0x220)
 Account flags, ACB (hex). See sam.h file.
 Password hash length. 14 = normal password. 0 or 4 = probably blank.
 
@@ -442,7 +442,7 @@ The bulk reset (-r -a) will also output parsable result:
 Reset user :01f4:Administrator
 Reset user :03e9:pnh
 
-which of course is :RID:username
+which of course is in the format :RID:username
 
 
 Explanation on this:
@@ -508,7 +508,7 @@ someone back :)
 
 Explanation on -a -r:
 
-The -r -a option will reset all users in the 0x220 group. Also user
+The -r -a option will reset all users in the 0x220 group. This includes user
 0x1f4, which maybe is bad.. will consider changing this...
 
 

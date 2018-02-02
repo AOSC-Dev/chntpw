@@ -33,16 +33,23 @@ http://pogostick.net/~pnh/ntpasswd/
 
 At that site there's a floppy and a bootable CD that use chntpw to
 access the NT/2k/XP/Vista/Win7/Win8 system it is booted on to edit password etc.
-The instructions below are for the standalone program itself, not the floppy.
+The instructions below are for the standalone program itself, not for the floppy.
 
 What does chntpw do?
 --------------------
 
 This little program will enable you to view some information and
-change user passwords, change user/group memberships
-in a Windows (NT/XP/Vista/win7/win8) etc SAM userdatabase file.
-You do not need to know the old passwords.
-However, you need to get at the registry files some way or another yourself.
+change user's passwords, change user/group's memberships
+in a Windows (NT, XP, Vista, Win7, Win8, etc.) SAM userdatabase file.
+You do not need to know the previous passwords.
+However, you need to access at the registry files some way or another yourself.
+
+For example, you can run this utility from a Live CD in a Windows computer
+and, after booting, mount the NTFS filesystem. Or remove the hard drive
+from the system and install it (e.g. using a USB hard-disk case) in a
+Linux system where you have this tool installed.
+
+
 In addition it contains a simple registry editor with full write support,
 and hex-editor which enables you to
 fiddle around with bits&bytes in the file as you wish yourself.
@@ -50,9 +57,9 @@ fiddle around with bits&bytes in the file as you wish yourself.
 Also have registry import or export
 -----------------------------------
 
-"reged" is a program that can do import and export of .reg files into
-the registry hive (binary) files. Also has an editor, but still
-rudimentary text based command line type thing.
+"reged" is a program that can import and export .reg files into
+the registry hive (binary) files. It also has an editor, but it is still
+a rudimentary text based command-line type of thing.
 
 And by popular request
 Even have programs that can be used in scripts!
@@ -69,41 +76,42 @@ Why?
 
 I often forget passwords. Especially on test installations (that
 I just _must_ have some stuff out of half a year later..)
-On most unix-based boxes you just boot the thingy off some kind
+On most Unix-based boxes you just boot the thingy off some kind
 of rescue bootmedia (cd/floppy etc), and simply edit the
 password file.
 On Windows however, as far as I know, there is no way except reinstalling
 the userdatabase, losing all users except admin.
 (ok, some companies let you pay lotsa $$$$$ for some rescue service..)
 (ok, from Windows Vista or something you can make a password reset
-file, but you have to remember to do that BEFORE you forget your password...)
+CD or USB, but you have to remember to do that BEFORE you forget your password...)
 
 How?
 ----
 
-Currently, this thing only runs under linux, but it may just happen
+Currently, this thing only runs under Linux, but it may just happen
 to compile on other platforms, too.
 
-So, to set a new adminpassword on your Windows installation you either:
+So, to set a new administrator's password on your Windows installation you either:
 
-1) Take the harddrive and mount it on a linux-box
+1) Take the harddrive and mount it on a Linux box
 
 or
 
-2) Boot a "live" linux CD with full GUI (many available: Ubuntu,
+2) Boot a "live" Linux CD with full GUI (there are many available: Ubuntu,
    Knoppix and more. Search for them)
 
-In both those cases, use the "chntpw.static" program found in the
+In both those cases, you can use the "chntpw.static" program found in the
 "static" zip file on my website.
+
 or
 
-3) Use my linux boot CD (or USB) at: http://pogostick.net/~pnh/ntpasswd/
+3) Use my Linux boot CD (or USB) avialable at: http://pogostick.net/~pnh/ntpasswd/
 
 Usage:
 ------
 
-For manual to the different commands, see MANUAL.txt
-Also, all have some help built in, just use the -h option.
+You will find a manual to the different commands in the  MANUAL.txt file.
+Also, all programs have some help built in, just use the -h option.
 
 Some old tech babble on how the password is stored
 --------------------------------------------------
@@ -112,21 +120,21 @@ Some old tech babble on how the password is stored
 
 A struct, called the V value of a key in the NT registry
 was suddenly somewhat documented through the pwdump utility
-included in the unix Samba distribution.
+included in the Unix Samba distribution.
 This struct contains some info on a user of the NT machine,
 along with 2 crypted versions of the password associated
 with the account.
 
 One password is the NT console login password,
-the other the LANMAN network share password
+the other is the LANMAN network share password
 (which essentially is the first one in uppercase only,
- and no unicode)
+ and no Unicode)
 
 This is how NT encrypts the passwords:
 
 The logon cleartext password a user enters is:
-1) Converted to unicode
-2) A MD4 hash is made out of the unicode string
+1) Converted to Unicode
+2) A MD4 hash is made out of the Unicode string
 3) Then the hash is crypted with DES, using the RID (lower
    part of the SID, userid) as the crypt key.
    This is the so called "obfuscation" step, so
@@ -138,7 +146,7 @@ For the LANMAN password:
 1) Uppercased (and illegal characters probably removed)
    14 bytes max, if less the remaining bytes are zeroed.
 2) A known (constant) string is DES-encrypted
-   using 7 first characters of the password as the key.
+   using the 7 first characters of the password as the key.
    Another constant is encrypted using the last 7 chars
    as the key.
    The result of these two crypts are simply appended,
@@ -146,13 +154,13 @@ For the LANMAN password:
 3) The same obfuscation DES stage as 3 above.
 4) 16 bytes result put into the V struct.
 
-Since the number of possible combinations in the lanman
+Since the number of possible combinations in the LANMAN
 password is relatively low compared to the other one,
 and it's easy to see if it's shorter than 8 chars or not
 it's used first in brute-force-crackers.
 
-This program, however, don't care at all what the old
-one is, it just overwrites it with the new one.
+This program, however, does not care at all what the old
+passowrd is, it just overwrites it with the new one.
 
 Ok. So, how do we find and identify the V struct?
 Yeah.. that was the hard part.. The files structure
@@ -208,4 +216,4 @@ vk-offs    size    type           name
 0x0035a8    80  REG_BINARY       <F>
 0x003228   508  REG_BINARY       <V>
 
-For more techincal info, look it up in the source code.
+For more technical info, look it up in the source code.
