@@ -4138,7 +4138,7 @@ int writeHive(struct hive *hdesc)
   if ( !(hdesc->state & HMODE_DIRTY)) return(0);
 
   if ( !(hdesc->state & HMODE_OPEN)) { /* File has been closed */
-    if (!(hdesc->filedesc = open(hdesc->filename,O_RDWR))) {
+    if ((hdesc->filedesc = open(hdesc->filename,O_RDWR)) < 0) {
       fprintf(stderr,"writeHive: open(%s) failed: %s, FILE NOT WRITTEN!\n",hdesc->filename,strerror(errno));
       return(1);
     }
